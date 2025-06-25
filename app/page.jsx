@@ -3,6 +3,7 @@ import { useState } from "react";
 import { saveAs } from "file-saver";
 import Image from "next/image";
 
+const kriterien = ["Sprint", "Sprung", "Reproduzierbarkeit", "Treffgenauigkeit"];
 const bewertungMap = { Sprint: 0.25, Sprung: 0.25, Reproduzierbarkeit: 0.25, Treffgenauigkeit: 0.25 };
 
 export default function Page() {
