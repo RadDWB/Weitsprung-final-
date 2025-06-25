@@ -2,9 +2,7 @@
 import { useState } from "react";
 import { saveAs } from "file-saver";
 import Image from "next/image";
-import logo from "@/public/logo.png"; // sicherstellen, dass logo.png in public liegt
 
-const kriterien = ["Sprint", "Sprung", "Reproduzierbarkeit", "Treffgenauigkeit"];
 const bewertungMap = { Sprint: 0.25, Sprung: 0.25, Reproduzierbarkeit: 0.25, Treffgenauigkeit: 0.25 };
 
 export default function Page() {
@@ -45,7 +43,7 @@ export default function Page() {
       <h1 className="text-2xl font-bold text-center">RadDWB Web-App zur Genauigkeitsmessung im Weitsprung</h1>
       <p className="text-center text-gray-600">in der Schule EF zur Berechnung von 4 Einzelparametern</p>
       <div className="flex justify-center">
-        <Image src={logo} alt="Weitsprung Logo" width={120} height={120} />
+        <Image src="/logo.png" alt="Weitsprung Logo" width={120} height={120} />
       </div>
 
       <div className="space-y-4">
