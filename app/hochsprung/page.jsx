@@ -103,9 +103,9 @@ export default function Page() {
   const [zentimeter, setZentimeter] = useState("");
   const [werte, setWerte] = useState({
     Anlauf: "",
-    Sprungausführung: "",
-    "Reproduzierbarkeit (3x)": "",
-    "Schwungbein-/Sprungbeintechnik": ""
+    Absprung: "",
+    Flugphase: "",
+    Landung: ""
   });
   const [liste, setListe] = useState([]);
   const [gewichtung, setGewichtung] = useState({
@@ -114,9 +114,9 @@ export default function Page() {
   });
   const [gewichtungQualitativ, setGewichtungQualitativ] = useState({
     Anlauf: 25,
-    Sprungausführung: 25,
-    "Reproduzierbarkeit (3x)": 25,
-    "Schwungbein-/Sprungbeintechnik": 25
+    Absprung: 25,
+    Flugphase: 25,
+    Landung: 25
   });
   const [showInfo, setShowInfo] = useState(false);
   const [showTabellenInfo, setShowTabellenInfo] = useState(false);
@@ -320,9 +320,9 @@ export default function Page() {
     setZentimeter("");
     setWerte({
       Anlauf: "",
-      Sprungausführung: "",
-      "Reproduzierbarkeit (3x)": "",
-      "Schwungbein-/Sprungbeintechnik": ""
+      Absprung: "",
+      Flugphase: "",
+      Landung: ""
     });
   };
 
@@ -420,13 +420,13 @@ export default function Page() {
               🏃 Anlauf
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🦘 Sprungausführung
+              ⬆️ Absprung
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🔄 Reproduzierbarkeit
+              ✈️ Flugphase
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🎯 Technik
+              🛬 Landung
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white card-shadow">
               📏 Höhe
@@ -521,7 +521,7 @@ export default function Page() {
               <div key={k} className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <span className="text-xl">{['🏃', '🦘', '🔄', '🎯'][idx]}</span>
+                    <span className="text-xl">{['🏃', '⬆️', '✈️', '🛬'][idx]}</span>
                     <span className="truncate">{kriterienKurz[idx]}</span>
                   </label>
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white min-w-[60px] justify-center">
@@ -547,9 +547,9 @@ export default function Page() {
             <button
               onClick={() => setGewichtungQualitativ({
                 Anlauf: 25,
-                Sprungausführung: 25,
-                "Reproduzierbarkeit (3x)": 25,
-                "Schwungbein-/Sprungbeintechnik": 25
+                Absprung: 25,
+                Flugphase: 25,
+                Landung: 25
               })}
               className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
             >
@@ -1074,10 +1074,10 @@ export default function Page() {
                   Bewertet die technische Ausführung des Hochsprungs in vier Teilbereichen:
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
-                  <li><strong>Anlauf:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
-                  <li><strong>Sprungausführung:</strong> Absprungtechnik, Flugphase, Landung</li>
-                  <li><strong>Reproduzierbarkeit (3x):</strong> Konstanz über drei Versuche</li>
-                  <li><strong>Schwungbein-/Sprungbeintechnik:</strong> Präzision beim Absprung</li>
+                  <li><strong>Anlauf:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufkurve, Timing</li>
+                  <li><strong>Absprung:</strong> Kraftentfaltung, Körperspannung, Absprungwinkel</li>
+                  <li><strong>Flugphase:</strong> Körperdrehung, Lattenüberquerung, Technik (Schere/Flop)</li>
+                  <li><strong>Landung:</strong> Kontrolle, Sicherheit, Körperhaltung auf der Matte</li>
                 </ul>
               </div>
 
