@@ -99,8 +99,7 @@ export default function Page() {
   const [name, setName] = useState("");
   const [selectedClass, setSelectedClass] = useState("EF-GK");
   const [selectedGender, setSelectedGender] = useState("boys");
-  const [meter, setMeter] = useState("");
-  const [zentimeter, setZentimeter] = useState("");
+  const [weite, setWeite] = useState(3.00);
   const [werte, setWerte] = useState({
     Anlaufgestaltung: "",
     Sprungausführung: "",
@@ -300,7 +299,7 @@ export default function Page() {
   };
 
   const speichern = () => {
-    const weiteInMetern = parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100;
+    const weiteInMetern = weite;
     const res = rechne(werte, weiteInMetern);
     const classOption = classOptions.find(opt => opt.value === selectedClass);
     const genderLabel = selectedGender === 'boys' ? 'Jungen' : 'Mädchen';
@@ -316,8 +315,7 @@ export default function Page() {
       ...res
     }]);
     setName("");
-    setMeter("");
-    setZentimeter("");
+    setWeite(3.00);
     setWerte({
       Anlaufgestaltung: "",
       Sprungausführung: "",
@@ -558,97 +556,50 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Input Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6 sm:p-8 space-y-6 animate-slideIn">
+        {/* Konfiguration (wird selten geändert) */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6 sm:p-8 space-y-5 animate-slideIn">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <span className="text-3xl">📝</span>
-            Neue Bewertung erfassen
+            <span className="text-3xl">⚙️</span>
+            Konfiguration
           </h2>
 
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Schüler/in Name
-                </label>
-                <input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Namen eingeben..."
-                  className="input-modern p-3 w-full text-lg shadow-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Klassenstufe / Kurs
-                </label>
-                <select
-                  value={selectedClass}
-                  onChange={e => setSelectedClass(e.target.value)}
-                  className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer hover:border-cyan-400 bg-white"
-                >
-                  <optgroup label="Klasse 1-4 (Grundschule)">
-                    {classOptions.filter(opt => ['K1', 'K2', 'K3', 'K4'].some(k => opt.value.startsWith(k))).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Klasse 5-10 (Sekundarstufe I)">
-                    {classOptions.filter(opt => ['K5', 'K6', 'K7', 'K8', 'K9', 'K10'].some(k => opt.value.startsWith(k))).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="GOSt: EF (Einführungsphase)">
-                    {classOptions.filter(opt => opt.value.startsWith('EF')).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="GOSt: Q1 (Qualifikationsphase 1)">
-                    {classOptions.filter(opt => opt.value.startsWith('Q1')).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="GOSt: Q2 (Qualifikationsphase 2)">
-                    {classOptions.filter(opt => opt.value.startsWith('Q2')).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
-            </div>
-
-            {/* Geschlechtsauswahl */}
-            <div className="bg-gradient-to-r from-pink-50 to-blue-50 rounded-xl p-4 border-2 border-gray-200">
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Geschlecht
+          <div className="space-y-4">
+            {/* Klassenstufe */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Klassenstufe / Kurs
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="boys"
-                    checked={selectedGender === 'boys'}
-                    onChange={e => setSelectedGender(e.target.value)}
-                    className="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span className="ml-3 text-lg font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
-                    👦 Jungen
-                  </span>
-                </label>
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="girls"
-                    checked={selectedGender === 'girls'}
-                    onChange={e => setSelectedGender(e.target.value)}
-                    className="w-5 h-5 text-pink-600 focus:ring-2 focus:ring-pink-500 cursor-pointer"
-                  />
-                  <span className="ml-3 text-lg font-medium text-gray-700 group-hover:text-pink-600 transition-colors">
-                    👧 Mädchen
-                  </span>
-                </label>
-              </div>
+              <select
+                value={selectedClass}
+                onChange={e => setSelectedClass(e.target.value)}
+                className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer hover:border-cyan-400 bg-white"
+              >
+                <optgroup label="Klasse 1-4 (Grundschule)">
+                  {classOptions.filter(opt => ['K1', 'K2', 'K3', 'K4'].some(k => opt.value.startsWith(k))).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Klasse 5-10 (Sekundarstufe I)">
+                  {classOptions.filter(opt => ['K5', 'K6', 'K7', 'K8', 'K9', 'K10'].some(k => opt.value.startsWith(k))).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="GOSt: EF (Einführungsphase)">
+                  {classOptions.filter(opt => opt.value.startsWith('EF')).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="GOSt: Q1 (Qualifikationsphase 1)">
+                  {classOptions.filter(opt => opt.value.startsWith('Q1')).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="GOSt: Q2 (Qualifikationsphase 2)">
+                  {classOptions.filter(opt => opt.value.startsWith('Q2')).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
 
             {/* Grenzwerte anzeigen Button */}
@@ -698,55 +649,136 @@ export default function Page() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            <div className="bg-blue-50 rounded-xl p-5">
-              <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+        {/* Schnelle Dateneingabe */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6 sm:p-8 space-y-6 animate-slideIn">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <span className="text-3xl">📝</span>
+            Bewertung erfassen
+          </h2>
+
+          <div className="space-y-5">
+            {/* Name & Geschlecht zusammen */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Schüler/in Name
+                </label>
+                <input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Namen eingeben..."
+                  className="input-modern p-3 w-full text-lg shadow-sm"
+                />
+              </div>
+
+              {/* Geschlechtsauswahl kompakt */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Geschlecht
+                </label>
+                <div className="flex gap-3 h-[52px] items-center">
+                  <label className="flex-1 flex items-center justify-center cursor-pointer group bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-3 border-2 border-blue-200 transition-all">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="boys"
+                      checked={selectedGender === 'boys'}
+                      onChange={e => setSelectedGender(e.target.value)}
+                      className="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="ml-2 text-base font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                      👦 Jungen
+                    </span>
+                  </label>
+                  <label className="flex-1 flex items-center justify-center cursor-pointer group bg-gradient-to-r from-pink-50 to-pink-100 hover:from-pink-100 hover:to-pink-200 rounded-xl p-3 border-2 border-pink-200 transition-all">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="girls"
+                      checked={selectedGender === 'girls'}
+                      onChange={e => setSelectedGender(e.target.value)}
+                      className="w-5 h-5 text-pink-600 focus:ring-2 focus:ring-pink-500 cursor-pointer"
+                    />
+                    <span className="ml-2 text-base font-semibold text-gray-700 group-hover:text-pink-600 transition-colors">
+                      👧 Mädchen
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 via-cyan-50 to-emerald-50 rounded-xl p-5 border-2 border-blue-200">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <span className="text-xl">📏</span>
                 Weitsprung-Weite
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Meter
-                  </label>
-                  <select
-                    value={meter}
-                    onChange={e => setMeter(e.target.value)}
-                    className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer bg-white"
-                  >
-                    <option value="">-</option>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(m => (
-                      <option key={m} value={m}>{m} m</option>
-                    ))}
-                  </select>
+
+              {/* Großer Weiten-Display */}
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-emerald-500 text-white shadow-xl">
+                  <span className="text-4xl font-bold tabular-nums">{weite.toFixed(2)}</span>
+                  <span className="text-2xl ml-2 font-semibold">m</span>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Zentimeter
-                  </label>
-                  <select
-                    value={zentimeter}
-                    onChange={e => setZentimeter(e.target.value)}
-                    className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer bg-white"
-                  >
-                    <option value="">-</option>
-                    {Array.from({ length: 100 }, (_, i) => i).map(cm => (
-                      <option key={cm} value={cm}>{cm} cm</option>
-                    ))}
-                  </select>
+                <div className="mt-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    {isGOSt() ? 'Notenpunkte:' : 'Note:'}
+                  </span>
+                  <span className="text-2xl font-bold ml-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    {berechneNoteAusWeite(weite)}{isGOSt() ? ' NP' : ''}
+                  </span>
                 </div>
               </div>
-              {meter && (
-                <div className="mt-3 p-3 bg-white rounded-lg">
-                  <p className="text-sm text-gray-600 font-semibold">
-                    Gesamtweite: {parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100} m
-                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusWeite(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
-                  </p>
-                  {getCurrentTableSummary() && (
-                    <div className="text-xs text-gray-500 mt-2">
-                      {isGOSt() ? 'Notenpunkt-Grenzen' : 'Notengrenzen'}: {getCurrentTableSummary().boundaries.map(b => `${b.label}${isGOSt() ? 'NP' : ''}=${b.value}m`).join(' | ')}
-                    </div>
-                  )}
+
+              {/* Slider */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs text-gray-600 font-semibold px-1">
+                  <span>0.50 m</span>
+                  <span>8.50 m</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.50"
+                  max="8.50"
+                  step="0.01"
+                  value={weite}
+                  onChange={(e) => setWeite(parseFloat(e.target.value))}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-custom"
+                  style={{
+                    background: `linear-gradient(to right,
+                      #3b82f6 0%,
+                      #06b6d4 ${((weite - 0.50) / (8.50 - 0.50)) * 100}%,
+                      #e5e7eb ${((weite - 0.50) / (8.50 - 0.50)) * 100}%,
+                      #e5e7eb 100%)`
+                  }}
+                />
+
+                {/* Schnellauswahl Buttons */}
+                <div className="flex flex-wrap gap-2 justify-center mt-3">
+                  {[2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00, 5.50, 6.00].map(w => (
+                    <button
+                      key={w}
+                      onClick={() => setWeite(w)}
+                      className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                        weite === w
+                          ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md scale-105'
+                          : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300'
+                      }`}
+                    >
+                      {w.toFixed(2)}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grenzwerte Info */}
+              {getCurrentTableSummary() && (
+                <div className="mt-4 p-3 bg-white/70 backdrop-blur-sm rounded-lg border border-blue-200">
+                  <div className="text-xs text-gray-600 font-semibold">
+                    {isGOSt() ? 'Notenpunkt-Grenzen' : 'Notengrenzen'}: {getCurrentTableSummary().boundaries.map(b => `${b.label}${isGOSt() ? 'NP' : ''}=${b.value}m`).join(' | ')}
+                  </div>
                 </div>
               )}
             </div>
@@ -785,7 +817,7 @@ export default function Page() {
                 disabled={(() => {
                   if (!name) return true;
                   const hasQualitativeData = !Object.values(werte).some(v => !v);
-                  const hasQuantitativeData = meter && meter !== "";
+                  const hasQuantitativeData = weite >= 0.50;
                   const needsQualitative = gewichtung.qualitativ > 0;
                   const needsQuantitative = gewichtung.quantitativ > 0;
 
