@@ -4,59 +4,59 @@ import { saveAs } from "file-saver";
 import Image from "next/image";
 import Link from "next/link";
 
-// Umbenannte Kriterien
-const kriterien = ["Anlaufgestaltung", "Sprungausführung", "Reproduzierbarkeit (3x)", "Genauigkeit zum Absprungpunkt/Zone"];
-const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Genauigkeit"];
+// Kriterien für Hochsprung
+const kriterien = ["Anlauf", "Sprungausführung", "Reproduzierbarkeit (3x)", "Schwungbein-/Sprungbeintechnik"];
+const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Technik"];
 
-// Offizielle NRW-Weitsprung-Tabellen - Korrigierte Version V3
+// Offizielle NRW-Hochsprung-Tabellen - Korrigierte Version V3
 // Quelle: Master-Bewertungstabelle Sport NRW (Final V3)
 // Klassen 1-10: note_1 bis note_5 (Schulnoten-System)
 // GOSt: Notenpunkte 15 bis 1 (Abitur-System mit Offset-Regel)
 const officialTables = {
   "grades_1_10": {
-    "1": { age: 6, boys: { 1: 2.95, 2: 2.54, 3: 2.08, 4: 1.63, 5: 1.01 }, girls: { 1: 2.60, 2: 2.22, 3: 1.92, 4: 1.40, 5: 1.10 } },
-    "2": { age: 7, boys: { 1: 3.20, 2: 2.79, 3: 2.33, 4: 1.88, 5: 1.26 }, girls: { 1: 2.85, 2: 2.47, 3: 2.17, 4: 1.65, 5: 1.35 } },
-    "3": { age: 8, boys: { 1: 3.45, 2: 3.04, 3: 2.58, 4: 2.13, 5: 1.51 }, girls: { 1: 3.10, 2: 2.72, 3: 2.42, 4: 1.90, 5: 1.60 } },
-    "4": { age: 9, boys: { 1: 3.70, 2: 3.29, 3: 2.83, 4: 2.38, 5: 1.76 }, girls: { 1: 3.35, 2: 2.97, 3: 2.67, 4: 2.15, 5: 1.85 } },
-    "5": { age: 10, boys: { 1: 3.95, 2: 3.54, 3: 3.08, 4: 2.63, 5: 2.01 }, girls: { 1: 3.60, 2: 3.22, 3: 2.92, 4: 2.40, 5: 2.10 } },
-    "6": { age: 11, boys: { 1: 4.10, 2: 3.70, 3: 3.26, 4: 2.78, 5: 2.26 }, girls: { 1: 3.70, 2: 3.32, 3: 3.01, 4: 2.51, 5: 2.19 } },
-    "7": { age: 12, boys: { 1: 4.25, 2: 3.84, 3: 3.40, 4: 2.91, 5: 2.38 }, girls: { 1: 3.80, 2: 3.42, 3: 3.10, 4: 2.62, 5: 2.28 } },
-    "8": { age: 13, boys: { 1: 4.45, 2: 4.07, 3: 3.60, 4: 3.26, 5: 2.71 }, girls: { 1: 3.90, 2: 3.52, 3: 3.19, 4: 2.73, 5: 2.37 } },
-    "9": { age: 14, boys: { 1: 4.80, 2: 4.45, 3: 4.06, 4: 3.71, 5: 3.22 }, girls: { 1: 4.00, 2: 3.62, 3: 3.28, 4: 2.84, 5: 2.46 } },
-    "10": { age: 15, boys: { 1: 5.10, 2: 4.72, 3: 4.32, 4: 3.93, 5: 3.42 }, girls: { 1: 4.10, 2: 3.72, 3: 3.37, 4: 2.95, 5: 2.55 } }
+    "1": { age: 6, boys: { 1: 0.90, 2: 0.80, 3: 0.70, 4: 0.60, 5: 0.50 }, girls: { 1: 0.85, 2: 0.75, 3: 0.65, 4: 0.55, 5: 0.45 } },
+    "2": { age: 7, boys: { 1: 0.95, 2: 0.85, 3: 0.75, 4: 0.65, 5: 0.55 }, girls: { 1: 0.90, 2: 0.80, 3: 0.70, 4: 0.60, 5: 0.50 } },
+    "3": { age: 8, boys: { 1: 1.00, 2: 0.90, 3: 0.80, 4: 0.70, 5: 0.60 }, girls: { 1: 0.95, 2: 0.85, 3: 0.75, 4: 0.65, 5: 0.55 } },
+    "4": { age: 9, boys: { 1: 1.05, 2: 0.95, 3: 0.85, 4: 0.75, 5: 0.65 }, girls: { 1: 1.00, 2: 0.90, 3: 0.80, 4: 0.70, 5: 0.60 } },
+    "5": { age: 10, boys: { 1: 1.15, 2: 1.05, 3: 0.95, 4: 0.85, 5: 0.75 }, girls: { 1: 1.10, 2: 1.00, 3: 0.90, 4: 0.80, 5: 0.70 } },
+    "6": { age: 11, boys: { 1: 1.25, 2: 1.15, 3: 1.00, 4: 0.90, 5: 0.80 }, girls: { 1: 1.15, 2: 1.05, 3: 0.95, 4: 0.85, 5: 0.75 } },
+    "7": { age: 12, boys: { 1: 1.35, 2: 1.20, 3: 1.10, 4: 0.95, 5: 0.85 }, girls: { 1: 1.22, 2: 1.12, 3: 1.00, 4: 0.90, 5: 0.80 } },
+    "8": { age: 13, boys: { 1: 1.42, 2: 1.27, 3: 1.15, 4: 1.00, 5: 0.90 }, girls: { 1: 1.30, 2: 1.18, 3: 1.05, 4: 0.95, 5: 0.85 } },
+    "9": { age: 14, boys: { 1: 1.46, 2: 1.31, 3: 1.18, 4: 1.05, 5: 0.95 }, girls: { 1: 1.35, 2: 1.22, 3: 1.10, 4: 1.00, 5: 0.90 } },
+    "10": { age: 15, boys: { 1: 1.51, 2: 1.35, 3: 1.20, 4: 1.10, 5: 1.00 }, girls: { 1: 1.38, 2: 1.26, 3: 1.12, 4: 1.02, 5: 0.92 } }
   },
   "gost": {
     "EF": {
       age: 16,
       LK: {
-        boys: { 15: 5.44, 14: 5.32, 13: 5.17, 12: 5.02, 11: 4.86, 10: 4.70, 9: 4.54, 8: 4.38, 7: 4.21, 6: 4.04, 5: 3.85, 4: 3.66, 3: 3.47, 2: 3.30, 1: 3.15 },
-        girls: { 15: 4.25, 14: 4.14, 13: 4.03, 12: 3.92, 11: 3.80, 10: 3.68, 9: 3.56, 8: 3.44, 7: 3.32, 6: 3.20, 5: 3.07, 4: 2.94, 3: 2.81, 2: 2.70, 1: 2.60 }
+        boys: { 15: 1.60, 14: 1.58, 13: 1.55, 12: 1.52, 11: 1.49, 10: 1.46, 9: 1.43, 8: 1.39, 7: 1.35, 6: 1.31, 5: 1.26, 4: 1.21, 3: 1.16, 2: 1.12, 1: 1.08 },
+        girls: { 15: 1.36, 14: 1.34, 13: 1.32, 12: 1.30, 11: 1.28, 10: 1.26, 9: 1.24, 8: 1.21, 7: 1.18, 6: 1.15, 5: 1.11, 4: 1.07, 3: 1.03, 2: 0.99, 1: 0.95 }
       },
       GK: {
-        boys: { 15: 5.32, 14: 5.17, 13: 5.02, 12: 4.86, 11: 4.70, 10: 4.54, 9: 4.38, 8: 4.21, 7: 4.04, 6: 3.85, 5: 3.66, 4: 3.47, 3: 3.30, 2: 3.15, 1: 3.00 },
-        girls: { 15: 4.14, 14: 4.03, 13: 3.92, 12: 3.80, 11: 3.68, 10: 3.56, 9: 3.44, 8: 3.32, 7: 3.20, 6: 3.07, 5: 2.94, 4: 2.81, 3: 2.70, 2: 2.60, 1: 2.50 }
+        boys: { 15: 1.58, 14: 1.55, 13: 1.52, 12: 1.49, 11: 1.46, 10: 1.43, 9: 1.39, 8: 1.35, 7: 1.31, 6: 1.26, 5: 1.21, 4: 1.16, 3: 1.12, 2: 1.08, 1: 1.04 },
+        girls: { 15: 1.34, 14: 1.32, 13: 1.30, 12: 1.28, 11: 1.26, 10: 1.24, 9: 1.21, 8: 1.18, 7: 1.15, 6: 1.11, 5: 1.07, 4: 1.03, 3: 0.99, 2: 0.95, 1: 0.90 }
       }
     },
     "Q1": {
       age: 17,
       LK: {
-        boys: { 15: 5.58, 14: 5.44, 13: 5.32, 12: 5.17, 11: 5.02, 10: 4.86, 9: 4.70, 8: 4.54, 7: 4.38, 6: 4.21, 5: 4.04, 4: 3.85, 3: 3.66, 2: 3.47, 1: 3.30 },
-        girls: { 15: 4.35, 14: 4.25, 13: 4.14, 12: 4.03, 11: 3.92, 10: 3.80, 9: 3.68, 8: 3.56, 7: 3.44, 6: 3.32, 5: 3.20, 4: 3.07, 3: 2.94, 2: 2.81, 1: 2.70 }
+        boys: { 15: 1.62, 14: 1.60, 13: 1.58, 12: 1.55, 11: 1.52, 10: 1.49, 9: 1.46, 8: 1.43, 7: 1.39, 6: 1.35, 5: 1.31, 4: 1.26, 3: 1.21, 2: 1.16, 1: 1.12 },
+        girls: { 15: 1.38, 14: 1.36, 13: 1.34, 12: 1.32, 11: 1.30, 10: 1.28, 9: 1.26, 8: 1.24, 7: 1.21, 6: 1.18, 5: 1.15, 4: 1.11, 3: 1.07, 2: 1.03, 1: 0.99 }
       },
       GK: {
-        boys: { 15: 5.44, 14: 5.32, 13: 5.17, 12: 5.02, 11: 4.86, 10: 4.70, 9: 4.54, 8: 4.38, 7: 4.21, 6: 4.04, 5: 3.85, 4: 3.66, 3: 3.47, 2: 3.30, 1: 3.15 },
-        girls: { 15: 4.25, 14: 4.14, 13: 4.03, 12: 3.92, 11: 3.80, 10: 3.68, 9: 3.56, 8: 3.44, 7: 3.32, 6: 3.20, 5: 3.07, 4: 2.94, 3: 2.81, 2: 2.70, 1: 2.60 }
+        boys: { 15: 1.60, 14: 1.58, 13: 1.55, 12: 1.52, 11: 1.49, 10: 1.46, 9: 1.43, 8: 1.39, 7: 1.35, 6: 1.31, 5: 1.26, 4: 1.21, 3: 1.16, 2: 1.12, 1: 1.08 },
+        girls: { 15: 1.36, 14: 1.34, 13: 1.32, 12: 1.30, 11: 1.28, 10: 1.26, 9: 1.24, 8: 1.21, 7: 1.18, 6: 1.15, 5: 1.11, 4: 1.07, 3: 1.03, 2: 0.99, 1: 0.95 }
       }
     },
     "Q2": {
       age: 18,
       LK: {
-        boys: { 15: 5.70, 14: 5.58, 13: 5.44, 12: 5.32, 11: 5.17, 10: 5.02, 9: 4.86, 8: 4.70, 7: 4.54, 6: 4.38, 5: 4.21, 4: 4.04, 3: 3.85, 2: 3.66, 1: 3.47 },
-        girls: { 15: 4.45, 14: 4.35, 13: 4.25, 12: 4.14, 11: 4.03, 10: 3.92, 9: 3.80, 8: 3.68, 7: 3.56, 6: 3.44, 5: 3.32, 4: 3.20, 3: 3.07, 2: 2.94, 1: 2.81 }
+        boys: { 15: 1.64, 14: 1.62, 13: 1.60, 12: 1.58, 11: 1.55, 10: 1.52, 9: 1.49, 8: 1.46, 7: 1.43, 6: 1.39, 5: 1.35, 4: 1.31, 3: 1.26, 2: 1.21, 1: 1.16 },
+        girls: { 15: 1.40, 14: 1.38, 13: 1.36, 12: 1.34, 11: 1.32, 10: 1.30, 9: 1.28, 8: 1.26, 7: 1.24, 6: 1.21, 5: 1.18, 4: 1.15, 3: 1.11, 2: 1.07, 1: 1.03 }
       },
       GK: {
-        boys: { 15: 5.58, 14: 5.44, 13: 5.32, 12: 5.17, 11: 5.02, 10: 4.86, 9: 4.70, 8: 4.54, 7: 4.38, 6: 4.21, 5: 4.04, 4: 3.85, 3: 3.66, 2: 3.47, 1: 3.30 },
-        girls: { 15: 4.35, 14: 4.25, 13: 4.14, 12: 4.03, 11: 3.92, 10: 3.80, 9: 3.68, 8: 3.56, 7: 3.44, 6: 3.32, 5: 3.20, 4: 3.07, 3: 2.94, 2: 2.81, 1: 2.70 }
+        boys: { 15: 1.62, 14: 1.60, 13: 1.58, 12: 1.55, 11: 1.52, 10: 1.49, 9: 1.46, 8: 1.43, 7: 1.39, 6: 1.35, 5: 1.31, 4: 1.26, 3: 1.21, 2: 1.16, 1: 1.12 },
+        girls: { 15: 1.38, 14: 1.36, 13: 1.34, 12: 1.32, 11: 1.30, 10: 1.28, 9: 1.26, 8: 1.24, 7: 1.21, 6: 1.18, 5: 1.15, 4: 1.11, 3: 1.07, 2: 1.03, 1: 0.99 }
       }
     }
   }
@@ -102,10 +102,10 @@ export default function Page() {
   const [meter, setMeter] = useState("");
   const [zentimeter, setZentimeter] = useState("");
   const [werte, setWerte] = useState({
-    Anlaufgestaltung: "",
+    Anlauf: "",
     Sprungausführung: "",
     "Reproduzierbarkeit (3x)": "",
-    "Genauigkeit zum Absprungpunkt/Zone": ""
+    "Schwungbein-/Sprungbeintechnik": ""
   });
   const [liste, setListe] = useState([]);
   const [gewichtung, setGewichtung] = useState({
@@ -113,10 +113,10 @@ export default function Page() {
     quantitativ: 50
   });
   const [gewichtungQualitativ, setGewichtungQualitativ] = useState({
-    Anlaufgestaltung: 25,
+    Anlauf: 25,
     Sprungausführung: 25,
     "Reproduzierbarkeit (3x)": 25,
-    "Genauigkeit zum Absprungpunkt/Zone": 25
+    "Schwungbein-/Sprungbeintechnik": 25
   });
   const [showInfo, setShowInfo] = useState(false);
   const [showTabellenInfo, setShowTabellenInfo] = useState(false);
@@ -179,7 +179,7 @@ export default function Page() {
     return { boys: boysData, girls: girlsData };
   };
 
-  const berechneNoteAusWeite = (weite) => {
+  const berechneNoteAusHöhe = (weite) => {
     const tableData = getCurrentTableData();
     if (!tableData) return isGOSt() ? "0" : "6";
 
@@ -275,12 +275,12 @@ export default function Page() {
       qualitativNote = punkteZuNote(qualitativSum);
     }
 
-    // Quantitative Bewertung (Weite) - offizielle Tabellen
+    // Quantitative Bewertung (Höhe) - offizielle Tabellen
     let quantitativSum = 0;
     let quantitativNote = "-";
 
     if (gewichtung.quantitativ > 0) {
-      const weitePunkte = berechneNoteAusWeite(weiteInMetern); // Gibt Notenpunkte zurück (0-15)
+      const weitePunkte = berechneNoteAusHöhe(weiteInMetern); // Gibt Notenpunkte zurück (0-15)
       quantitativSum = parseInt(weitePunkte);
       // Konvertiere Notenpunkte zu Anzeige-Note (mit Plus/Minus)
       quantitativNote = isGOSt() ? weitePunkte : punkteZuNote(quantitativSum);
@@ -319,10 +319,10 @@ export default function Page() {
     setMeter("");
     setZentimeter("");
     setWerte({
-      Anlaufgestaltung: "",
+      Anlauf: "",
       Sprungausführung: "",
       "Reproduzierbarkeit (3x)": "",
-      "Genauigkeit zum Absprungpunkt/Zone": ""
+      "Schwungbein-/Sprungbeintechnik": ""
     });
   };
 
@@ -333,7 +333,7 @@ export default function Page() {
   };
 
   const exportCSV = () => {
-    const header = ["Name", "Tabelle", "Weite (m)", ...kriterienKurz, "Qualitativ", "Quantitativ", "Gesamt", "Endnote"];
+    const header = ["Name", "Tabelle", "Höhe (m)", ...kriterienKurz, "Qualitativ", "Quantitativ", "Gesamt", "Endnote"];
     const rows = liste.map(a => [
       a.name,
       a.tabelle,
@@ -345,7 +345,7 @@ export default function Page() {
       a.note
     ]);
     const csv = [header, ...rows].map(r => r.join(",")).join("\n");
-    saveAs(new Blob([csv], { type: "text/csv" }), "weitsprung_bewertung.csv");
+    saveAs(new Blob([csv], { type: "text/csv" }), "hochsprung_bewertung.csv");
   };
 
   const getCurrentTableSummary = () => {
@@ -392,29 +392,29 @@ export default function Page() {
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text leading-tight">
-            Web-App Bewertung Weitsprung
+            Web-App Bewertung Hochsprung
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Qualitative und quantitative Bewertung im Weitsprung
+            Qualitative und quantitative Bewertung im Hochsprung
           </p>
           <p className="text-sm text-gray-500">
             Offizielle NRW-Tabellen • Klassen 1-10 (1-5 Noten) & GOSt (15-Punkte-System nach Heft 4734/2)
           </p>
 
           {/* Wechsel-Button zu Hochsprung */}
-          <Link href="/hochsprung" className="inline-block">
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
+          <Link href="/" className="inline-block">
+            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
               <span className="text-xl">🏃‍♂️</span>
               Zur Hochsprung-Bewertung
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
           </Link>
 
           <div className="flex justify-center gap-2 text-sm text-gray-500 flex-wrap">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🏃 Anlaufgestaltung
+              🏃 Anlauf
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
               🦘 Sprungausführung
@@ -426,7 +426,7 @@ export default function Page() {
               🎯 Absprunggenauigkeit
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-600 text-white card-shadow">
-              📏 Weite
+              📏 Höhe
             </span>
           </div>
         </div>
@@ -471,7 +471,7 @@ export default function Page() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-700">📏 Quantitativ (Weite)</label>
+                <label className="text-sm font-semibold text-gray-700">📏 Quantitativ (Höhe)</label>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 text-white min-w-[60px] justify-center">
                   {gewichtung.quantitativ}%
                 </span>
@@ -543,10 +543,10 @@ export default function Page() {
           <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
             <button
               onClick={() => setGewichtungQualitativ({
-                Anlaufgestaltung: 25,
+                Anlauf: 25,
                 Sprungausführung: 25,
                 "Reproduzierbarkeit (3x)": 25,
-                "Genauigkeit zum Absprungpunkt/Zone": 25
+                "Schwungbein-/Sprungbeintechnik": 25
               })}
               className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
             >
@@ -659,7 +659,7 @@ export default function Page() {
                 <span className="text-sm font-normal opacity-90">(Mindestleistungen)</span>
               </button>
               <p className="text-xs text-gray-600 mt-2 text-center">
-                Zeigt ab welcher Weite welche Note erreicht wird
+                Zeigt ab welcher Höhe welche Note erreicht wird
               </p>
             </div>
 
@@ -699,7 +699,7 @@ export default function Page() {
             <div className="bg-blue-50 rounded-xl p-5">
               <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                 <span className="text-xl">📏</span>
-                Weitsprung-Weite
+                Hochsprung-Höhe
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -737,7 +737,7 @@ export default function Page() {
                 <div className="mt-3 p-3 bg-white rounded-lg">
                   <p className="text-sm text-gray-600 font-semibold">
                     Gesamtweite: {parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100} m
-                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusWeite(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
+                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusHöhe(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
                   </p>
                   {getCurrentTableSummary() && (
                     <div className="text-xs text-gray-500 mt-2">
@@ -837,7 +837,7 @@ export default function Page() {
                       <tr>
                         <th className="px-4 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Name</th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Tabelle</th>
-                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Weite</th>
+                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Höhe</th>
                         {kriterienKurz.map((k, idx) => (
                           <th key={k} className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
                             <div className="flex flex-col items-center gap-1">
@@ -855,7 +855,7 @@ export default function Page() {
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
                           <div className="flex flex-col items-center gap-1">
                             <span>Quantitativ</span>
-                            <span className="text-xs normal-case">(Weite)</span>
+                            <span className="text-xs normal-case">(Höhe)</span>
                           </div>
                         </th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Endnote</th>
@@ -918,7 +918,7 @@ export default function Page() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold flex items-center gap-2">
                   <span className="text-3xl">📊</span>
-                  Offizielle NRW-Weitsprung-Tabellen
+                  Offizielle NRW-Hochsprung-Tabellen
                 </h3>
                 <button
                   onClick={() => setShowTabellenInfo(false)}
@@ -950,7 +950,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Q2 LK - Jungen (Abitur)</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">NP</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[15, 12, 9, 6, 3, 1].map(np => (
@@ -966,7 +966,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Q2 LK - Mädchen (Abitur)</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">NP</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[15, 12, 9, 6, 3, 1].map(np => (
@@ -992,7 +992,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Klasse 10 - Jungen</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">Note</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[1,2,3,4,5].map(note => (
@@ -1008,7 +1008,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Klasse 10 - Mädchen</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">Note</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[1,2,3,4,5].map(note => (
@@ -1061,27 +1061,27 @@ export default function Page() {
                 <h4 className="font-bold text-gray-800 mb-2">🎯 Was ist die Hauptgewichtung?</h4>
                 <p className="text-gray-600 leading-relaxed">
                   Die Hauptgewichtung bestimmt, wie stark die <strong>Technik</strong> (qualitative Kriterien)
-                  im Vergleich zur <strong>Weite</strong> (quantitative Messung) in die Gesamtnote einfließt.
+                  im Vergleich zur <strong>Höhe</strong> (quantitative Messung) in die Gesamtnote einfließt.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-bold text-gray-800 mb-2">🎨 Qualitativ (Technik) - {gewichtung.qualitativ}%</h4>
                 <p className="text-gray-600 leading-relaxed mb-2">
-                  Bewertet die technische Ausführung des Weitsprungs in vier Teilbereichen:
+                  Bewertet die technische Ausführung des Hochsprungs in vier Teilbereichen:
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
-                  <li><strong>Anlaufgestaltung:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
+                  <li><strong>Anlauf:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
                   <li><strong>Sprungausführung:</strong> Absprungtechnik, Flugphase, Landung</li>
                   <li><strong>Reproduzierbarkeit (3x):</strong> Konstanz über drei Versuche</li>
-                  <li><strong>Genauigkeit zum Absprungpunkt/Zone:</strong> Präzision beim Absprung</li>
+                  <li><strong>Schwungbein-/Sprungbeintechnik:</strong> Präzision beim Absprung</li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-bold text-gray-800 mb-2">📏 Quantitativ (Weite) - {gewichtung.quantitativ}%</h4>
+                <h4 className="font-bold text-gray-800 mb-2">📏 Quantitativ (Höhe) - {gewichtung.quantitativ}%</h4>
                 <p className="text-gray-600 leading-relaxed">
-                  Bewertet die gemessene Sprungweite anhand offizieller NRW-Tabellen.
+                  Bewertet die gemessene Sprunghöhe anhand offizieller NRW-Tabellen.
                   Die Tabellen sind alters- und geschlechtsspezifisch und berücksichtigen
                   für die GOSt auch die Unterscheidung zwischen Grund- und Leistungskurs.
                 </p>
@@ -1094,7 +1094,7 @@ export default function Page() {
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
                   <li><strong>Mehr Technik:</strong> Schieben Sie den linken Regler nach rechts (z.B. 70% qualitativ, 30% quantitativ)</li>
-                  <li><strong>Mehr Weite:</strong> Schieben Sie den rechten Regler nach rechts (z.B. 30% qualitativ, 70% quantitativ)</li>
+                  <li><strong>Mehr Höhe:</strong> Schieben Sie den rechten Regler nach rechts (z.B. 30% qualitativ, 70% quantitativ)</li>
                   <li><strong>Ausgewogen:</strong> Standard ist 50/50 - beide Aspekte gleich wichtig</li>
                 </ul>
               </div>
@@ -1343,7 +1343,7 @@ export default function Page() {
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Die hinterlegten Tabellen basieren auf offiziellen NRW-Standards und wissenschaftlich fundierten
                   Leistungserwartungen. Sie bilden <strong>ohne Anpassung</strong> ab, was im Land Nordrhein-Westfalen
-                  regulär als Weitsprung-Leistung für die entsprechende Notenstufe oder Punktzahl erwartet wird.
+                  regulär als Hochsprung-Leistung für die entsprechende Notenstufe oder Punktzahl erwartet wird.
                   Eine Anpassung sollte daher nur nach sorgfältiger Abwägung erfolgen.
                 </p>
               </div>
@@ -1400,14 +1400,14 @@ export default function Page() {
                 </p>
                 <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
                   <li><strong>Qualitativ ({gewichtung.qualitativ}%)</strong>: Technische Bewertung mit 1+/1/1-/... System</li>
-                  <li><strong>Quantitativ ({gewichtung.quantitativ}%)</strong>: Weitsprung-Weite basierend auf offiziellen NRW-Tabellen (1-5)</li>
+                  <li><strong>Quantitativ ({gewichtung.quantitativ}%)</strong>: Hochsprung-Höhe basierend auf offiziellen NRW-Tabellen (1-5)</li>
                 </ul>
               </div>
 
               <div>
                 <h4 className="font-bold text-gray-800 mb-2">📊 Offizielle Tabellen</h4>
                 <p className="text-gray-600 leading-relaxed mb-2">
-                  Die quantitative Bewertung nutzt offizielle Weitsprung-Tabellen aus NRW:
+                  Die quantitative Bewertung nutzt offizielle Hochsprung-Tabellen aus NRW:
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   <li><strong>Klassen 1-10:</strong> 1-5 Notensystem (RNG Wangen, Reismann-Gymnasium, DSA)</li>
