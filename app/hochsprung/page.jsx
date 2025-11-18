@@ -175,39 +175,9 @@ export default function Page() {
 
     if (!boysData || !girlsData) return null;
 
-    const isGOStTable = isGOSt();
-    const result = { boys: {}, girls: {} };
-
-    if (isGOStTable) {
-      // GOSt: 15-Punkte-System - reduziere Grenzwert durch Anhebung
-      for (let np = 1; np <= 15; np++) {
-        // Finde den ursprünglichen Notenpunkt, der nach Anhebung zu np wird
-        const originalNp = Math.max(1, np - tabellenAnhebung);
-        if (boysData[originalNp]) result.boys[np] = boysData[originalNp];
-        if (girlsData[originalNp]) result.girls[np] = girlsData[originalNp];
-      }
-    } else {
-      // Klassen 1-10: Note zu Notenpunkten, Anhebung, zurück zu Note
-      const notenMap = { 1: 15, 2: 12, 3: 9, 4: 6, 5: 3 };
-      for (let note = 1; note <= 5; note++) {
-        const notenpunkte = notenMap[note];
-        // Finde ursprünglichen Notenpunkt nach Abzug der Anhebung
-        const originalNp = Math.max(0, notenpunkte - tabellenAnhebung);
-        // Finde welche ursprüngliche Note das war
-        let originalNote = 6;
-        for (let n = 1; n <= 5; n++) {
-          if (notenMap[n] === originalNp || (notenMap[n] && notenMap[n] >= originalNp && (!notenMap[n-1] || notenMap[n-1] < originalNp))) {
-            originalNote = n;
-            break;
-          }
-        }
-        // Verwende den Grenzwert dieser ursprünglichen Note
-        if (boysData[originalNote]) result.boys[note] = boysData[originalNote];
-        if (girlsData[originalNote]) result.girls[note] = girlsData[originalNote];
-      }
-    }
-
-    return result;
+    // Einfach die originalen Tabellenwerte zurückgeben
+    // Die Anhebung wird separat in der Anzeige erklärt
+    return { boys: boysData, girls: girlsData };
   };
 
   const berechneNoteAusHöhe = (weite) => {
@@ -1180,21 +1150,22 @@ export default function Page() {
               </div>
 
               <div className="p-6 space-y-6">
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                  <p className="text-sm text-blue-900">
+                    <strong>Lesehinweis:</strong> Die Tabelle zeigt die originalen Mindestleistungen (in Metern) aus der offiziellen NRW-Tabelle für die jeweilige Note.
+                  </p>
+                </div>
+
                 {tabellenAnhebung > 0 && (
                   <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
                     <p className="text-sm text-orange-900 font-medium">
                       ⚠️ Achtung: Tabellen-Anpassung aktiv (+{tabellenAnhebung} {tabellenAnhebung === 1 ? 'Notenpunkt' : 'Notenpunkte'})
                       <br />
-                      Die angezeigten Grenzwerte berücksichtigen bereits diese Anhebung.
+                      Bei der Bewertung werden auf die erreichten Notenpunkte zusätzlich {tabellenAnhebung} {tabellenAnhebung === 1 ? 'Notenpunkt' : 'Notenpunkte'} addiert.
+                      Die unten angezeigten Grenzwerte sind die <strong>ursprünglichen Tabellenwerte ohne Anhebung</strong>.
                     </p>
                   </div>
                 )}
-
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                  <p className="text-sm text-blue-900">
-                    <strong>Lesehinweis:</strong> Die Tabelle zeigt die Mindestleistung (in Metern), die für die jeweilige Note erreicht werden muss.
-                  </p>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Jungen */}
