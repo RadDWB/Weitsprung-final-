@@ -10,11 +10,47 @@ export default function Page() {
   const [name, setName] = useState("");
   const [werte, setWerte] = useState({ Sprint: "", Sprung: "", Reproduzierbarkeit: "", Treffgenauigkeit: "" });
   const [liste, setListe] = useState([]);
+  const [gewichtung, setGewichtung] = useState({ Sprint: 25, Sprung: 25, Reproduzierbarkeit: 25, Treffgenauigkeit: 25 });
 
   const handle = (k, v) => setWerte(prev => ({ ...prev, [k]: v }));
+
+  const handleGewichtung = (key, newValue) => {
+    const currentTotal = gewichtung.Sprint + gewichtung.Sprung + gewichtung.Reproduzierbarkeit + gewichtung.Treffgenauigkeit;
+    const oldValue = gewichtung[key];
+    const diff = newValue - oldValue;
+
+    // Berechne die Summe der anderen drei Werte
+    const otherKeys = kriterien.filter(k => k !== key);
+    const otherSum = otherKeys.reduce((sum, k) => sum + gewichtung[k], 0);
+
+    if (otherSum === 0 && diff > 0) return; // Verhindere Division durch Null
+
+    // Erstelle neue Gewichtung
+    const newGewichtung = { ...gewichtung, [key]: newValue };
+
+    // Verteile die Differenz proportional auf die anderen
+    const remaining = 100 - newValue;
+    if (remaining >= 0 && otherSum > 0) {
+      otherKeys.forEach(k => {
+        const proportion = gewichtung[k] / otherSum;
+        newGewichtung[k] = Math.max(0, Math.round(remaining * proportion));
+      });
+
+      // Korrigiere Rundungsfehler
+      const actualTotal = newGewichtung.Sprint + newGewichtung.Sprung + newGewichtung.Reproduzierbarkeit + newGewichtung.Treffgenauigkeit;
+      if (actualTotal !== 100) {
+        const firstOtherKey = otherKeys[0];
+        newGewichtung[firstOtherKey] += (100 - actualTotal);
+      }
+    }
+
+    setGewichtung(newGewichtung);
+  };
+
   const rechne = (d) => {
     const g = ["Sprint", "Sprung", "Reproduzierbarkeit", "Treffgenauigkeit"].map(k => parseInt(d[k]));
-    const sum = g[0]*0.25 + g[1]*0.25 + ((g[2]+g[3])/2)*0.5;
+    const w = [gewichtung.Sprint, gewichtung.Sprung, gewichtung.Reproduzierbarkeit, gewichtung.Treffgenauigkeit];
+    const sum = (g[0] * w[0] + g[1] * w[1] + g[2] * w[2] + g[3] * w[3]) / 100;
     const punkte = Math.round(sum * 5);
     const notenMap = {15:'1+',14:'1',13:'1-',12:'2+',11:'2',10:'2-',9:'3+',8:'3',7:'3-',6:'4+',5:'4',4:'4-',3:'5+',2:'5',1:'5-',0:'6'};
     return { gesamt: sum.toFixed(2), punkte15: punkte, note: notenMap[punkte] || "-" };
@@ -69,6 +105,65 @@ export default function Page() {
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
               🎯 Treffgenauigkeit
             </span>
+          </div>
+        </div>
+
+        {/* Gewichtungs-Slider */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6 sm:p-8 space-y-6 animate-slideIn">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <span className="text-3xl">⚖️</span>
+            Gewichtung anpassen
+            <span className="ml-auto text-sm font-normal text-gray-500">
+              Summe: {gewichtung.Sprint + gewichtung.Sprung + gewichtung.Reproduzierbarkeit + gewichtung.Treffgenauigkeit}%
+            </span>
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {kriterien.map((k, idx) => (
+              <div key={k} className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <span className="text-xl">{['🏃', '🦘', '🔄', '🎯'][idx]}</span>
+                    {k}
+                  </label>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 text-white min-w-[60px] justify-center">
+                    {gewichtung[k]}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={gewichtung[k]}
+                  onChange={(e) => handleGewichtung(k, parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-custom"
+                  style={{
+                    background: `linear-gradient(to right, #0891b2 0%, #0891b2 ${gewichtung[k]}%, #e5e7eb ${gewichtung[k]}%, #e5e7eb 100%)`
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+            <button
+              onClick={() => setGewichtung({ Sprint: 25, Sprung: 25, Reproduzierbarkeit: 25, Treffgenauigkeit: 25 })}
+              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
+            >
+              🔄 Zurücksetzen (25% je)
+            </button>
+            <button
+              onClick={() => setGewichtung({ Sprint: 50, Sprung: 50, Reproduzierbarkeit: 0, Treffgenauigkeit: 0 })}
+              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
+            >
+              Leistung fokussiert
+            </button>
+            <button
+              onClick={() => setGewichtung({ Sprint: 0, Sprung: 0, Reproduzierbarkeit: 50, Treffgenauigkeit: 50 })}
+              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
+            >
+              Genauigkeit fokussiert
+            </button>
           </div>
         </div>
 
