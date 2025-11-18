@@ -627,7 +627,28 @@ export default function Page() {
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 onClick={speichern}
-                disabled={!name || !meter || Object.values(werte).some(v => !v)}
+                disabled={(() => {
+                  if (!name) return true;
+                  const hasQualitativeData = !Object.values(werte).some(v => !v);
+                  const hasQuantitativeData = meter && meter !== "";
+                  const needsQualitative = gewichtung.qualitativ > 0;
+                  const needsQuantitative = gewichtung.quantitativ > 0;
+
+                  // Wenn beide Gewichtungen > 0, dann beide Datentypen erforderlich
+                  if (needsQualitative && needsQuantitative) {
+                    return !hasQualitativeData || !hasQuantitativeData;
+                  }
+                  // Wenn nur qualitativ > 0, nur qualitative Daten erforderlich
+                  if (needsQualitative && !needsQuantitative) {
+                    return !hasQualitativeData;
+                  }
+                  // Wenn nur quantitativ > 0, nur quantitative Daten erforderlich
+                  if (!needsQualitative && needsQuantitative) {
+                    return !hasQuantitativeData;
+                  }
+                  // Wenn beide 0 (sollte nicht vorkommen), keine Daten erforderlich
+                  return false;
+                })()}
                 className="btn-gradient text-white font-semibold px-8 py-3 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2"
               >
                 <span className="text-xl">💾</span>
