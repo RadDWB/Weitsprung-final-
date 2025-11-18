@@ -4,10 +4,12 @@ import { saveAs } from "file-saver";
 import Image from "next/image";
 
 // Umbenannte Kriterien
-const kriterien = ["Anlaufgestaltung", "Sprungausführung", "Reproduzierbarkeit (3 Versuche)", "Nähe zum Absprungpunkt/-bereich"];
-const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Absprunggenauigkeit"];
+const kriterien = ["Anlaufgestaltung", "Sprungausführung", "Reproduzierbarkeit (3x)", "Genauigkeit zum Absprungpunkt/Zone"];
+const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Genauigkeit"];
 
-// Offizielle NRW-Weitsprung-Tabellen (basierend auf RNG Wangen, Reismann-Gymnasium, DSA)
+// Offizielle NRW-Weitsprung-Tabellen
+// Klassen 1-10: basierend auf RNG Wangen, Reismann-Gymnasium, DSA (1-5 Notensystem)
+// GOSt: Offizielle Abitur-Tabellen NRW Heft 4734/2 (1-15 Notenpunkte nach APO-GOSt)
 const officialTables = {
   "grades_1_10": {
     "1": { age: 6, boys: { 1: 2.95, 2: 2.54, 3: 2.08, 4: 1.63, 5: 1.01 }, girls: { 1: 2.60, 2: 2.22, 3: 1.92, 4: 1.40, 5: 1.10 } },
@@ -24,18 +26,36 @@ const officialTables = {
   "gost": {
     "EF": {
       age: 16,
-      LK: { boys: { 1: 5.41, 2: 4.98, 3: 4.50, 4: 4.02, 5: 3.48 }, girls: { 1: 4.16, 2: 3.82, 3: 3.46, 4: 3.10, 5: 2.69 } },
-      GK: { boys: { 1: 5.26, 2: 4.83, 3: 4.35, 4: 3.87, 5: 3.33 }, girls: { 1: 4.01, 2: 3.67, 3: 3.31, 4: 2.95, 5: 2.54 } }
+      LK: {
+        boys: { 1: 3.47, 2: 3.47, 3: 3.47, 4: 3.66, 5: 3.85, 6: 4.04, 7: 4.21, 8: 4.38, 9: 4.54, 10: 4.70, 11: 4.86, 12: 5.02, 13: 5.17, 14: 5.32, 15: 5.44 },
+        girls: { 1: 2.81, 2: 2.81, 3: 2.81, 4: 2.94, 5: 3.07, 6: 3.20, 7: 3.32, 8: 3.44, 9: 3.56, 10: 3.68, 11: 3.80, 12: 3.92, 13: 4.03, 14: 4.14, 15: 4.25 }
+      },
+      GK: {
+        boys: { 1: 3.47, 2: 3.47, 3: 3.47, 4: 3.47, 5: 3.66, 6: 3.85, 7: 4.04, 8: 4.21, 9: 4.38, 10: 4.54, 11: 4.70, 12: 4.86, 13: 5.02, 14: 5.17, 15: 5.32 },
+        girls: { 1: 2.81, 2: 2.81, 3: 2.81, 4: 2.81, 5: 2.94, 6: 3.07, 7: 3.20, 8: 3.32, 9: 3.44, 10: 3.56, 11: 3.68, 12: 3.80, 13: 3.92, 14: 4.03, 15: 4.14 }
+      }
     },
     "Q1": {
       age: 17,
-      LK: { boys: { 1: 5.56, 2: 5.13, 3: 4.65, 4: 4.17, 5: 3.63 }, girls: { 1: 4.31, 2: 3.97, 3: 3.61, 4: 3.25, 5: 2.84 } },
-      GK: { boys: { 1: 5.41, 2: 4.98, 3: 4.50, 4: 4.02, 5: 3.48 }, girls: { 1: 4.16, 2: 3.82, 3: 3.46, 4: 3.10, 5: 2.69 } }
+      LK: {
+        boys: { 1: 3.47, 2: 3.47, 3: 3.66, 4: 3.85, 5: 4.04, 6: 4.21, 7: 4.38, 8: 4.54, 9: 4.70, 10: 4.86, 11: 5.02, 12: 5.17, 13: 5.32, 14: 5.44, 15: 5.58 },
+        girls: { 1: 2.81, 2: 2.81, 3: 2.94, 4: 3.07, 5: 3.20, 6: 3.32, 7: 3.44, 8: 3.56, 9: 3.68, 10: 3.80, 11: 3.92, 12: 4.03, 13: 4.14, 14: 4.25, 15: 4.35 }
+      },
+      GK: {
+        boys: { 1: 3.47, 2: 3.47, 3: 3.47, 4: 3.66, 5: 3.85, 6: 4.04, 7: 4.21, 8: 4.38, 9: 4.54, 10: 4.70, 11: 4.86, 12: 5.02, 13: 5.17, 14: 5.32, 15: 5.44 },
+        girls: { 1: 2.81, 2: 2.81, 3: 2.81, 4: 2.94, 5: 3.07, 6: 3.20, 7: 3.32, 8: 3.44, 9: 3.56, 10: 3.68, 11: 3.80, 12: 3.92, 13: 4.03, 14: 4.14, 15: 4.25 }
+      }
     },
     "Q2": {
       age: 18,
-      LK: { boys: { 1: 5.71, 2: 5.28, 3: 4.80, 4: 4.32, 5: 3.78 }, girls: { 1: 4.46, 2: 4.12, 3: 3.76, 4: 3.40, 5: 2.99 } },
-      GK: { boys: { 1: 5.56, 2: 5.13, 3: 4.65, 4: 4.17, 5: 3.63 }, girls: { 1: 4.31, 2: 3.97, 3: 3.61, 4: 3.25, 5: 2.84 } }
+      LK: {
+        boys: { 1: 3.47, 2: 3.66, 3: 3.85, 4: 4.04, 5: 4.21, 6: 4.38, 7: 4.54, 8: 4.70, 9: 4.86, 10: 5.02, 11: 5.17, 12: 5.32, 13: 5.44, 14: 5.58, 15: 5.70 },
+        girls: { 1: 2.81, 2: 2.94, 3: 3.07, 4: 3.20, 5: 3.32, 6: 3.44, 7: 3.56, 8: 3.68, 9: 3.80, 10: 3.92, 11: 4.03, 12: 4.14, 13: 4.25, 14: 4.35, 15: 4.45 }
+      },
+      GK: {
+        boys: { 1: 3.47, 2: 3.47, 3: 3.66, 4: 3.85, 5: 4.04, 6: 4.21, 7: 4.38, 8: 4.54, 9: 4.70, 10: 4.86, 11: 5.02, 12: 5.17, 13: 5.32, 14: 5.44, 15: 5.58 },
+        girls: { 1: 2.81, 2: 2.81, 3: 2.94, 4: 3.07, 5: 3.20, 6: 3.32, 7: 3.44, 8: 3.56, 9: 3.68, 10: 3.80, 11: 3.92, 12: 4.03, 13: 4.14, 14: 4.25, 15: 4.35 }
+      }
     }
   }
 };
@@ -72,8 +92,8 @@ export default function Page() {
   const [werte, setWerte] = useState({
     Anlaufgestaltung: "",
     Sprungausführung: "",
-    "Reproduzierbarkeit (3 Versuche)": "",
-    "Nähe zum Absprungpunkt/-bereich": ""
+    "Reproduzierbarkeit (3x)": "",
+    "Genauigkeit zum Absprungpunkt/Zone": ""
   });
   const [liste, setListe] = useState([]);
   const [gewichtung, setGewichtung] = useState({
@@ -83,11 +103,12 @@ export default function Page() {
   const [gewichtungQualitativ, setGewichtungQualitativ] = useState({
     Anlaufgestaltung: 25,
     Sprungausführung: 25,
-    "Reproduzierbarkeit (3 Versuche)": 25,
-    "Nähe zum Absprungpunkt/-bereich": 25
+    "Reproduzierbarkeit (3x)": 25,
+    "Genauigkeit zum Absprungpunkt/Zone": 25
   });
   const [showInfo, setShowInfo] = useState(false);
   const [showTabellenInfo, setShowTabellenInfo] = useState(false);
+  const [showHauptgewichtungInfo, setShowHauptgewichtungInfo] = useState(false);
 
   const handle = (k, v) => setWerte(prev => ({ ...prev, [k]: v }));
 
@@ -125,11 +146,27 @@ export default function Page() {
     }
   };
 
+  const isGOSt = () => {
+    const option = tableOptions.find(opt => opt.value === selectedTable);
+    return option && option.type === 'gost';
+  };
+
   const berechneNoteAusWeite = (weite) => {
     const tableData = getCurrentTableData();
-    if (!tableData) return "6";
+    if (!tableData) return isGOSt() ? "0" : "6";
 
-    // Finde passende Note basierend auf den Schwellenwerten
+    // Für GOSt: 15-Punkte-System (höher = besser)
+    if (isGOSt()) {
+      // Suche nach höchstem Notenpunkt, der erreicht wird
+      for (let np = 15; np >= 1; np--) {
+        if (tableData[np] && weite >= tableData[np]) {
+          return np.toString();
+        }
+      }
+      return "0"; // Unterhalb aller Schwellenwerte
+    }
+
+    // Für Klassen 1-10: 1-6 Notensystem
     if (weite >= tableData[1]) return "1";
     if (weite >= tableData[2]) return "2";
     if (weite >= tableData[3]) return "3";
@@ -138,47 +175,61 @@ export default function Page() {
     return "6";
   };
 
-  const noteZuPunkten = (note) => {
-    const notenMap = {
-      '1+': 3, '1': 2.75, '1-': 2.5,
-      '2+': 2.25, '2': 2, '2-': 1.75,
-      '3+': 1.5, '3': 1.25, '3-': 1,
-      '4+': 0.75, '4': 0.5, '4-': 0.25,
-      '5+': 0.125, '5': 0.0625, '5-': 0.03125,
-      '6': 0
-    };
-    return notenMap[note] || 0;
+  const noteZuPunkten = (note, isQualitative = false) => {
+    const np = parseInt(note);
+    if (isNaN(np)) return 0;
+
+    // Qualitative 4-Stufen-Bewertung zu 15-Punkte-Skala
+    if (isQualitative) {
+      const qualitativeMap = {
+        1: 15,  // Sehr gut (Maximum)
+        2: 10,  // Gut
+        3: 5,   // Mit Fehlern
+        4: 1    // Falsch
+      };
+      return qualitativeMap[np] || 0;
+    }
+
+    // Quantitative Bewertung: Für GOSt (0-15) direkt verwenden, für Klassen (1-6) konvertieren
+    if (np >= 0 && np <= 15) {
+      return np;  // GOSt Notenpunkte direkt
+    }
+
+    // Fallback für Klassen-Noten (1-6) zu Punkten
+    const klassenMap = { 1: 15, 2: 12, 3: 9, 4: 6, 5: 3, 6: 0 };
+    return klassenMap[np] || 0;
   };
 
   const punkteZuNote = (punkte) => {
-    if (punkte >= 3) return '1+';
-    if (punkte >= 2.75) return '1';
-    if (punkte >= 2.5) return '1-';
-    if (punkte >= 2.25) return '2+';
-    if (punkte >= 2) return '2';
-    if (punkte >= 1.75) return '2-';
-    if (punkte >= 1.5) return '3+';
-    if (punkte >= 1.25) return '3';
-    if (punkte >= 1) return '3-';
-    if (punkte >= 0.75) return '4+';
-    if (punkte >= 0.5) return '4';
-    if (punkte >= 0.25) return '4-';
-    if (punkte >= 0.125) return '5+';
-    if (punkte >= 0.0625) return '5';
-    if (punkte >= 0.03125) return '5-';
+    // Konvertiere zurück zu Notensystem
+    if (punkte >= 15) return '1+';
+    if (punkte >= 14) return '1';
+    if (punkte >= 13) return '1-';
+    if (punkte >= 12) return '2+';
+    if (punkte >= 11) return '2';
+    if (punkte >= 10) return '2-';
+    if (punkte >= 9) return '3+';
+    if (punkte >= 8) return '3';
+    if (punkte >= 7) return '3-';
+    if (punkte >= 6) return '4+';
+    if (punkte >= 5) return '4';
+    if (punkte >= 4) return '4-';
+    if (punkte >= 3) return '5+';
+    if (punkte >= 2) return '5';
+    if (punkte >= 1) return '5-';
     return '6';
   };
 
   const rechne = (d, weiteInMetern) => {
-    // Qualitative Bewertung
-    const qualitativeNoten = kriterien.map(k => noteZuPunkten(d[k]));
+    // Qualitative Bewertung (4-Stufen-System)
+    const qualitativeNoten = kriterien.map(k => noteZuPunkten(d[k], true));
     const qualitativeGewichte = kriterien.map(k => gewichtungQualitativ[k]);
     const qualitativSum = qualitativeNoten.reduce((sum, note, idx) =>
       sum + (note * qualitativeGewichte[idx]), 0) / 100;
 
     // Quantitative Bewertung (Weite) - offizielle Tabellen
     const weiteNote = berechneNoteAusWeite(weiteInMetern);
-    const quantitativSum = noteZuPunkten(weiteNote);
+    const quantitativSum = noteZuPunkten(weiteNote, false);
 
     // Gesamtbewertung
     const gesamt = (qualitativSum * gewichtung.qualitativ + quantitativSum * gewichtung.quantitativ) / 100;
@@ -197,15 +248,24 @@ export default function Page() {
     const weiteInMetern = parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100;
     const res = rechne(werte, weiteInMetern);
     const tableLabel = tableOptions.find(opt => opt.value === selectedTable)?.label || selectedTable;
-    setListe([...liste, { name, tabelle: tableLabel, ...werte, ...res }]);
+    const isGOStEntry = isGOSt();
+    setListe([...liste, {
+      name,
+      tabelle: tableLabel,
+      isGOSt: isGOStEntry,
+      gewichtung: { ...gewichtung },
+      gewichtungQualitativ: { ...gewichtungQualitativ },
+      ...werte,
+      ...res
+    }]);
     setName("");
     setMeter("");
     setZentimeter("");
     setWerte({
       Anlaufgestaltung: "",
       Sprungausführung: "",
-      "Reproduzierbarkeit (3 Versuche)": "",
-      "Nähe zum Absprungpunkt/-bereich": ""
+      "Reproduzierbarkeit (3x)": "",
+      "Genauigkeit zum Absprungpunkt/Zone": ""
     });
   };
 
@@ -235,13 +295,32 @@ export default function Page() {
     const tableData = getCurrentTableData();
     if (!tableData) return null;
 
-    return {
-      note1: tableData[1],
-      note2: tableData[2],
-      note3: tableData[3],
-      note4: tableData[4],
-      note5: tableData[5]
-    };
+    if (isGOSt()) {
+      // Für GOSt: Zeige ausgewählte Notenpunkte (15, 12, 9, 6, 3, 1)
+      return {
+        boundaries: [
+          { label: '15', value: tableData[15] },
+          { label: '12', value: tableData[12] },
+          { label: '9', value: tableData[9] },
+          { label: '6', value: tableData[6] },
+          { label: '3', value: tableData[3] },
+          { label: '1', value: tableData[1] }
+        ],
+        isGOSt: true
+      };
+    } else {
+      // Für Klassen 1-10: Zeige Noten 1-5
+      return {
+        boundaries: [
+          { label: '1', value: tableData[1] },
+          { label: '2', value: tableData[2] },
+          { label: '3', value: tableData[3] },
+          { label: '4', value: tableData[4] },
+          { label: '5', value: tableData[5] }
+        ],
+        isGOSt: false
+      };
+    }
   };
 
   return (
@@ -262,7 +341,7 @@ export default function Page() {
             Qualitative und quantitative Bewertung im Weitsprung
           </p>
           <p className="text-sm text-gray-500">
-            Offizielle NRW-Tabellen • Klassen 1-10 & GOSt (EF/Q1/Q2, GK/LK)
+            Offizielle NRW-Tabellen • Klassen 1-10 (1-5 Noten) & GOSt (15-Punkte-System nach Heft 4734/2)
           </p>
           <div className="flex justify-center gap-2 text-sm text-gray-500 flex-wrap">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
@@ -288,6 +367,15 @@ export default function Page() {
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <span className="text-3xl">⚖️</span>
             Hauptgewichtung: Qualitativ vs. Quantitativ
+            <button
+              onClick={() => setShowHauptgewichtungInfo(true)}
+              className="ml-auto text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-full"
+              title="Hilfe zur Hauptgewichtung"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-3">
@@ -388,34 +476,12 @@ export default function Page() {
               onClick={() => setGewichtungQualitativ({
                 Anlaufgestaltung: 25,
                 Sprungausführung: 25,
-                "Reproduzierbarkeit (3 Versuche)": 25,
-                "Nähe zum Absprungpunkt/-bereich": 25
+                "Reproduzierbarkeit (3x)": 25,
+                "Genauigkeit zum Absprungpunkt/Zone": 25
               })}
               className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
             >
               🔄 Zurücksetzen (25% je)
-            </button>
-          </div>
-        </div>
-
-        {/* Tabellen-Info */}
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl card-shadow-lg p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <span className="text-3xl">📊</span>
-                Offizielle NRW-Weitsprung-Tabellen
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Quellen: RNG Wangen, Reismann-Gymnasium Bielefeld, DSA Quick-Check 2025
-              </p>
-            </div>
-            <button
-              onClick={() => setShowTabellenInfo(true)}
-              className="btn-gradient text-white font-semibold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2"
-            >
-              <span className="text-xl">ℹ️</span>
-              Tabellen ansehen
             </button>
           </div>
         </div>
@@ -519,11 +585,11 @@ export default function Page() {
                 <div className="mt-3 p-3 bg-white rounded-lg">
                   <p className="text-sm text-gray-600 font-semibold">
                     Gesamtweite: {parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100} m
-                    → Note: <span className="text-blue-600 text-lg">{berechneNoteAusWeite(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}</span>
+                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusWeite(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
                   </p>
                   {getCurrentTableSummary() && (
                     <div className="text-xs text-gray-500 mt-2">
-                      Notengrenzen: 1={getCurrentTableSummary().note1}m | 2={getCurrentTableSummary().note2}m | 3={getCurrentTableSummary().note3}m | 4={getCurrentTableSummary().note4}m | 5={getCurrentTableSummary().note5}m
+                      {isGOSt() ? 'Notenpunkt-Grenzen' : 'Notengrenzen'}: {getCurrentTableSummary().boundaries.map(b => `${b.label}${isGOSt() ? 'NP' : ''}=${b.value}m`).join(' | ')}
                     </div>
                   )}
                 </div>
@@ -548,9 +614,10 @@ export default function Page() {
                       className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer hover:border-cyan-400 bg-white"
                     >
                       <option value="">Bitte wählen...</option>
-                      {['1+', '1', '1-', '2+', '2', '2-', '3+', '3', '3-', '4+', '4', '4-', '5+', '5', '5-', '6'].map(note => (
-                        <option key={note} value={note}>{note}</option>
-                      ))}
+                      <option value="1">1 - Sehr gut (Maximum)</option>
+                      <option value="2">2 - Gut</option>
+                      <option value="3">3 - Mit Fehlern</option>
+                      <option value="4">4 - Falsch</option>
                     </select>
                   </div>
                 ))}
@@ -606,8 +673,18 @@ export default function Page() {
                             </div>
                           </th>
                         ))}
-                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Qualitativ</th>
-                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Quantitativ</th>
+                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
+                          <div className="flex flex-col items-center gap-1">
+                            <span>Qualitativ</span>
+                            <span className="text-xs normal-case">(Note)</span>
+                          </div>
+                        </th>
+                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
+                          <div className="flex flex-col items-center gap-1">
+                            <span>Quantitativ</span>
+                            <span className="text-xs normal-case">(Weite)</span>
+                          </div>
+                        </th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Endnote</th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Aktion</th>
                       </tr>
@@ -632,7 +709,7 @@ export default function Page() {
                           </td>
                           <td className="px-4 py-4 text-center">
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
-                              {a.quantitativNote}
+                              {a.quantitativNote}{a.isGOSt ? ' NP' : ''}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-center">
@@ -690,41 +767,86 @@ export default function Page() {
                 </ul>
               </div>
 
-              {/* Tabellen anzeigen - vereinfacht */}
-              <div className="space-y-4">
-                <h4 className="font-bold text-lg text-gray-800">Beispiel: EF (16 Jahre)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border rounded-lg p-4">
-                    <p className="font-semibold mb-2">Jungen - Grundkurs</p>
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-100">
-                        <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
-                      </thead>
-                      <tbody>
-                        {[1,2,3,4,5].map(note => (
-                          <tr key={note} className="border-t">
-                            <td className="p-2 text-center font-bold">{note}</td>
-                            <td className="p-2 text-center">{officialTables.gost.EF.GK.boys[note]} m</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {/* Tabellen anzeigen */}
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-bold text-lg text-gray-800 mb-3">GOSt: 15-Punkte-System (NRW Heft 4734/2)</h4>
+                  <p className="text-sm text-gray-600 mb-3">Für EF, Q1 und Q2 wird das offizielle 15-Notenpunkte-System verwendet.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-4 bg-blue-50">
+                      <p className="font-semibold mb-2">Q2 LK - Jungen (Abitur)</p>
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                        </thead>
+                        <tbody>
+                          {[15, 12, 9, 6, 3, 1].map(np => (
+                            <tr key={np} className="border-t">
+                              <td className="p-2 text-center font-bold">{np}</td>
+                              <td className="p-2 text-center">{officialTables.gost.Q2.LK.boys[np]} m</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="border rounded-lg p-4 bg-pink-50">
+                      <p className="font-semibold mb-2">Q2 LK - Mädchen (Abitur)</p>
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                        </thead>
+                        <tbody>
+                          {[15, 12, 9, 6, 3, 1].map(np => (
+                            <tr key={np} className="border-t">
+                              <td className="p-2 text-center font-bold">{np}</td>
+                              <td className="p-2 text-center">{officialTables.gost.Q2.LK.girls[np]} m</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <div className="border rounded-lg p-4">
-                    <p className="font-semibold mb-2">Mädchen - Grundkurs</p>
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-100">
-                        <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
-                      </thead>
-                      <tbody>
-                        {[1,2,3,4,5].map(note => (
-                          <tr key={note} className="border-t">
-                            <td className="p-2 text-center font-bold">{note}</td>
-                            <td className="p-2 text-center">{officialTables.gost.EF.GK.girls[note]} m</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Hinweis: GK ist jeweils 1 Notenpunkt leichter als LK. EF/Q1 sind jeweils 1 Notenpunkt leichter als die Folgestufe.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-lg text-gray-800 mb-3">Klassen 1-10: 1-5 Notensystem</h4>
+                  <p className="text-sm text-gray-600 mb-3">Für Klassen 1-10 wird das klassische 1-5 Notensystem verwendet.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-4">
+                      <p className="font-semibold mb-2">Klasse 10 - Jungen</p>
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                        </thead>
+                        <tbody>
+                          {[1,2,3,4,5].map(note => (
+                            <tr key={note} className="border-t">
+                              <td className="p-2 text-center font-bold">{note}</td>
+                              <td className="p-2 text-center">{officialTables.grades_1_10["10"].boys[note]} m</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="border rounded-lg p-4">
+                      <p className="font-semibold mb-2">Klasse 10 - Mädchen</p>
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100">
+                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                        </thead>
+                        <tbody>
+                          {[1,2,3,4,5].map(note => (
+                            <tr key={note} className="border-t">
+                              <td className="p-2 text-center font-bold">{note}</td>
+                              <td className="p-2 text-center">{officialTables.grades_1_10["10"].girls[note]} m</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -735,6 +857,89 @@ export default function Page() {
                   className="w-full btn-gradient text-white font-semibold px-6 py-3 rounded-xl shadow-lg"
                 >
                   Schließen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hauptgewichtung Info Modal */}
+      {showHauptgewichtungInfo && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowHauptgewichtungInfo(false)}>
+          <div className="bg-white rounded-2xl card-shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <span className="text-3xl">⚖️</span>
+                  Hauptgewichtung verstehen
+                </h3>
+                <button
+                  onClick={() => setShowHauptgewichtungInfo(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200 flex items-center justify-center text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2">🎯 Was ist die Hauptgewichtung?</h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Die Hauptgewichtung bestimmt, wie stark die <strong>Technik</strong> (qualitative Kriterien)
+                  im Vergleich zur <strong>Weite</strong> (quantitative Messung) in die Gesamtnote einfließt.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2">🎨 Qualitativ (Technik) - {gewichtung.qualitativ}%</h4>
+                <p className="text-gray-600 leading-relaxed mb-2">
+                  Bewertet die technische Ausführung des Weitsprungs in vier Teilbereichen:
+                </p>
+                <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
+                  <li><strong>Anlaufgestaltung:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
+                  <li><strong>Sprungausführung:</strong> Absprungtechnik, Flugphase, Landung</li>
+                  <li><strong>Reproduzierbarkeit (3x):</strong> Konstanz über drei Versuche</li>
+                  <li><strong>Genauigkeit zum Absprungpunkt/Zone:</strong> Präzision beim Absprung</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2">📏 Quantitativ (Weite) - {gewichtung.quantitativ}%</h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Bewertet die gemessene Sprungweite anhand offizieller NRW-Tabellen.
+                  Die Tabellen sind alters- und geschlechtsspezifisch und berücksichtigen
+                  für die GOSt auch die Unterscheidung zwischen Grund- und Leistungskurs.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2">⚙️ Wie stelle ich die Gewichtung ein?</h4>
+                <p className="text-gray-600 leading-relaxed mb-2">
+                  Verwenden Sie die beiden Schieberegler, um die Gewichtung anzupassen:
+                </p>
+                <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
+                  <li><strong>Mehr Technik:</strong> Schieben Sie den linken Regler nach rechts (z.B. 70% qualitativ, 30% quantitativ)</li>
+                  <li><strong>Mehr Weite:</strong> Schieben Sie den rechten Regler nach rechts (z.B. 30% qualitativ, 70% quantitativ)</li>
+                  <li><strong>Ausgewogen:</strong> Standard ist 50/50 - beide Aspekte gleich wichtig</li>
+                </ul>
+              </div>
+
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                <p className="text-sm text-blue-900">
+                  <strong>💡 Tipp:</strong> Die Gewichtung können Sie für jeden Schüler individuell anpassen.
+                  Bei Anfängern empfiehlt sich oft eine höhere Technik-Gewichtung (z.B. 70/30),
+                  bei fortgeschrittenen Schülern eine ausgewogenere Verteilung (50/50).
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowHauptgewichtungInfo(false)}
+                  className="w-full btn-gradient text-white font-semibold px-6 py-3 rounded-xl"
+                >
+                  Verstanden
                 </button>
               </div>
             </div>
@@ -775,10 +980,13 @@ export default function Page() {
 
               <div>
                 <h4 className="font-bold text-gray-800 mb-2">📊 Offizielle Tabellen</h4>
-                <p className="text-gray-600 leading-relaxed">
-                  Die quantitative Bewertung nutzt offizielle Weitsprung-Tabellen aus NRW für Klassen 1-10 und GOSt (EF/Q1/Q2, jeweils GK und LK).
-                  Diese basieren auf anerkannten Schulstandards und dem Deutschen Sportabzeichen.
+                <p className="text-gray-600 leading-relaxed mb-2">
+                  Die quantitative Bewertung nutzt offizielle Weitsprung-Tabellen aus NRW:
                 </p>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  <li><strong>Klassen 1-10:</strong> 1-5 Notensystem (RNG Wangen, Reismann-Gymnasium, DSA)</li>
+                  <li><strong>GOSt (EF/Q1/Q2):</strong> 15-Notenpunkte-System nach NRW Heft 4734/2 (Abitur-Tabellen), getrennt nach GK und LK</li>
+                </ul>
               </div>
 
               <div>
