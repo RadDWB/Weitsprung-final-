@@ -232,22 +232,34 @@ export default function Page() {
 
   const rechne = (d, weiteInMetern) => {
     // Qualitative Bewertung (4-Stufen-System)
-    const qualitativeNoten = kriterien.map(k => noteZuPunkten(d[k], true));
-    const qualitativeGewichte = kriterien.map(k => gewichtungQualitativ[k]);
-    const qualitativSum = qualitativeNoten.reduce((sum, note, idx) =>
-      sum + (note * qualitativeGewichte[idx]), 0) / 100;
+    let qualitativSum = 0;
+    let qualitativNote = "-";
+
+    if (gewichtung.qualitativ > 0) {
+      const qualitativeNoten = kriterien.map(k => noteZuPunkten(d[k], true));
+      const qualitativeGewichte = kriterien.map(k => gewichtungQualitativ[k]);
+      qualitativSum = qualitativeNoten.reduce((sum, note, idx) =>
+        sum + (note * qualitativeGewichte[idx]), 0) / 100;
+      qualitativNote = punkteZuNote(qualitativSum);
+    }
 
     // Quantitative Bewertung (Weite) - offizielle Tabellen
-    const weiteNote = berechneNoteAusWeite(weiteInMetern);
-    const quantitativSum = noteZuPunkten(weiteNote, false);
+    let quantitativSum = 0;
+    let quantitativNote = "-";
+
+    if (gewichtung.quantitativ > 0) {
+      const weiteNote = berechneNoteAusWeite(weiteInMetern);
+      quantitativSum = noteZuPunkten(weiteNote, false);
+      quantitativNote = weiteNote;
+    }
 
     // Gesamtbewertung
     const gesamt = (qualitativSum * gewichtung.qualitativ + quantitativSum * gewichtung.quantitativ) / 100;
     const endnote = punkteZuNote(gesamt);
 
     return {
-      qualitativNote: punkteZuNote(qualitativSum),
-      quantitativNote: weiteNote,
+      qualitativNote: qualitativNote,
+      quantitativNote: quantitativNote,
       gesamt: gesamt.toFixed(2),
       note: endnote,
       weite: weiteInMetern.toFixed(2)
