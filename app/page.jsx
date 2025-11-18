@@ -372,7 +372,7 @@ export default function Page() {
           <div className="flex justify-center mb-6 animate-slideIn">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 rounded-full blur-2xl opacity-30 animate-pulse"></div>
-              <Image src="/logo.png" alt="Weitsprung Logo" width={140} height={140} className="relative rounded-full shadow-2xl" />
+              <Image src="/Sprungapp_logo.jpg" alt="Sprungapp Logo" width={140} height={140} className="relative rounded-full shadow-2xl" />
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text leading-tight">
