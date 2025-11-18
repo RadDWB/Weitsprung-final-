@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 // Kriterien für Hochsprung
-const kriterien = ["Anlauf", "Sprungausführung", "Reproduzierbarkeit (3x)", "Schwungbein-/Sprungbeintechnik"];
-const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Technik"];
+const kriterien = ["Anlauf", "Absprung", "Flugphase", "Landung"];
+const kriterienKurz = ["Anlauf", "Absprung", "Flugphase", "Landung"];
 
 // Offizielle NRW-Hochsprung-Tabellen - Korrigierte Version V3
 // Quelle: Master-Bewertungstabelle Sport NRW (Final V3)
