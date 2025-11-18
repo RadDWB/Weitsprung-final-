@@ -177,21 +177,27 @@ export default function Page() {
           break;
         }
       }
-      // Anhebung hinzufügen (maximal 15 Punkte)
+      // Anhebung in Notenpunkten hinzufügen (maximal 15 Punkte)
       const mitAnhebung = Math.min(15, erreichtePunkte + tabellenAnhebung);
       return mitAnhebung.toString();
     }
 
-    // Für Klassen 1-10: 1-6 Notensystem
-    let note = 6;
-    if (weite >= tableData[1]) note = 1;
-    else if (weite >= tableData[2]) note = 2;
-    else if (weite >= tableData[3]) note = 3;
-    else if (weite >= tableData[4]) note = 4;
-    else if (weite >= tableData[5]) note = 5;
+    // Für Klassen 1-10: 1-6 Notensystem → Notenpunkte → Anhebung
+    let basisNote = 6;
+    if (weite >= tableData[1]) basisNote = 1;
+    else if (weite >= tableData[2]) basisNote = 2;
+    else if (weite >= tableData[3]) basisNote = 3;
+    else if (weite >= tableData[4]) basisNote = 4;
+    else if (weite >= tableData[5]) basisNote = 5;
 
-    // Anhebung hinzufügen (Note wird besser, minimal 1)
-    const mitAnhebung = Math.max(1, note - tabellenAnhebung);
+    // Konvertiere Note zu Notenpunkten (1=15, 2=12, 3=9, 4=6, 5=3, 6=0)
+    const notePunkteMap = { 1: 15, 2: 12, 3: 9, 4: 6, 5: 3, 6: 0 };
+    const basisPunkte = notePunkteMap[basisNote];
+
+    // Anhebung in Notenpunkten hinzufügen (maximal 15 Punkte)
+    const mitAnhebung = Math.min(15, basisPunkte + tabellenAnhebung);
+
+    // Gib Notenpunkte als String zurück (nicht die Anzeige-Note)
     return mitAnhebung.toString();
   };
 
@@ -258,9 +264,10 @@ export default function Page() {
     let quantitativNote = "-";
 
     if (gewichtung.quantitativ > 0) {
-      const weiteNote = berechneNoteAusWeite(weiteInMetern);
-      quantitativSum = noteZuPunkten(weiteNote, false);
-      quantitativNote = weiteNote;
+      const weitePunkte = berechneNoteAusWeite(weiteInMetern); // Gibt Notenpunkte zurück (0-15)
+      quantitativSum = parseInt(weitePunkte);
+      // Konvertiere Notenpunkte zu Anzeige-Note (mit Plus/Minus)
+      quantitativNote = isGOSt() ? weitePunkte : punkteZuNote(quantitativSum);
     }
 
     // Gesamtbewertung
@@ -635,13 +642,13 @@ export default function Page() {
                 className="input-modern p-3 w-full text-base shadow-sm cursor-pointer hover:border-orange-400 bg-white"
               >
                 <option value={0}>Standard (keine Anpassung)</option>
-                <option value={1}>+1 Punkt (leichte Anhebung)</option>
-                <option value={2}>+2 Punkte (mittlere Anhebung)</option>
-                <option value={3}>+3 Punkte (starke Anhebung)</option>
+                <option value={1}>+1 Notenpunkt (leichte Anhebung)</option>
+                <option value={2}>+2 Notenpunkte (mittlere Anhebung)</option>
+                <option value={3}>+3 Notenpunkte (starke Anhebung)</option>
               </select>
               {tabellenAnhebung > 0 && (
                 <div className="mt-2 text-xs text-orange-700 bg-orange-100 p-2 rounded">
-                  ⚠️ Anpassung aktiv: Alle Noten werden um {tabellenAnhebung} {tabellenAnhebung === 1 ? 'Punkt' : 'Punkte'} angehoben
+                  ⚠️ Anpassung aktiv: Alle Noten werden um {tabellenAnhebung} {tabellenAnhebung === 1 ? 'Notenpunkt' : 'Notenpunkte'} angehoben
                 </div>
               )}
             </div>
@@ -1092,7 +1099,7 @@ export default function Page() {
             <div className="p-6 space-y-6">
               <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
                 <p className="text-sm text-orange-900 font-medium">
-                  Diese Funktion ermöglicht es Ihnen, die Bewertungstabellen um 1, 2 oder 3 Punkte anzuheben,
+                  Diese Funktion ermöglicht es Ihnen, die Bewertungstabellen um 1, 2 oder 3 Notenpunkte anzuheben,
                   um besonderen Bedingungen Ihrer Lerngruppe gerecht zu werden.
                 </p>
               </div>
@@ -1103,13 +1110,26 @@ export default function Page() {
                   Was bedeutet die Anhebung?
                 </h4>
                 <p className="text-gray-600 leading-relaxed mb-3">
-                  Eine Anhebung verbessert die Bewertung aller Schüler*innen:
+                  Eine Anhebung verbessert die Bewertung aller Schüler*innen um 1, 2 oder 3 Notenpunkte:
                 </p>
-                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
-                  <li><strong>+1 Punkt:</strong> Eine Sprungweite, die normalerweise Note 3 (bzw. 10 NP) ergibt, wird zu Note 2 (bzw. 11 NP)</li>
-                  <li><strong>+2 Punkte:</strong> Note 4 → Note 2 (bzw. 8 NP → 10 NP)</li>
-                  <li><strong>+3 Punkte:</strong> Note 5 → Note 2 (bzw. 6 NP → 9 NP)</li>
-                </ul>
+                <div className="space-y-3">
+                  <div className="bg-blue-50 p-3 rounded">
+                    <p className="font-semibold text-gray-800 mb-2">Für Klassen 1-10:</p>
+                    <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm ml-2">
+                      <li><strong>+1 Notenpunkt:</strong> Note 3 (9 NP) → Note 2- (10 NP)</li>
+                      <li><strong>+2 Notenpunkte:</strong> Note 3 (9 NP) → Note 2 (11 NP)</li>
+                      <li><strong>+3 Notenpunkte:</strong> Note 3 (9 NP) → Note 2+ (12 NP)</li>
+                    </ul>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded">
+                    <p className="font-semibold text-gray-800 mb-2">Für GOSt (15-Punkte-System):</p>
+                    <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm ml-2">
+                      <li><strong>+1 Notenpunkt:</strong> 10 NP → 11 NP</li>
+                      <li><strong>+2 Notenpunkte:</strong> 10 NP → 12 NP</li>
+                      <li><strong>+3 Notenpunkte:</strong> 10 NP → 13 NP</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
               <div>
