@@ -1,3 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --gradient-from: #3b82f6;
+    --gradient-via: #06b6d4;
+    --gradient-to: #10b981;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-blue-50 via-cyan-50 to-emerald-50 min-h-screen;
+  }
+}
+
+@layer utilities {
+  .card-shadow {
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 5px 15px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-shadow-lg {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 25px -8px rgba(0, 0, 0, 0.1);
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent;
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 hover:from-blue-700 hover:via-cyan-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+  }
+
+  .input-modern {
+    @apply border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 rounded-lg;
+  }
+
+  .table-modern {
+    @apply backdrop-blur-sm bg-white/80 rounded-xl overflow-hidden;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.6s ease-out;
+}
