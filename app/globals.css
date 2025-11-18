@@ -27,6 +27,10 @@
     @apply bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent;
   }
 
+  .gradient-text-orange {
+    @apply bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent;
+  }
+
   .btn-gradient {
     @apply bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 hover:from-blue-700 hover:via-cyan-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
   }

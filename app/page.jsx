@@ -402,15 +402,18 @@ export default function Page() {
           </p>
 
           {/* Wechsel-Button zu Hochsprung */}
-          <Link href="/hochsprung" className="inline-block">
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
-              <span className="text-xl">🏃‍♂️</span>
-              Zur Hochsprung-Bewertung
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </Link>
+          <div className="mt-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+            <Link href="/hochsprung" className="inline-block relative">
+              <button className="px-8 py-4 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-bold text-lg rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-orange-500/50 hover:scale-110 flex items-center gap-3 mx-auto border-2 border-white/20">
+                <span className="text-2xl animate-bounce">⬆️</span>
+                <span>Zur Hochsprung-Bewertung</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </Link>
+          </div>
 
           <div className="flex justify-center gap-2 text-sm text-gray-500 flex-wrap">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">

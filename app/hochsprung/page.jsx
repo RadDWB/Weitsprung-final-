@@ -387,11 +387,11 @@ export default function Page() {
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-6 animate-slideIn">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 rounded-2xl blur-2xl opacity-30 animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 rounded-2xl blur-2xl opacity-30 animate-pulse"></div>
               <Image src="/Sprungapp_logo.jpg" alt="Sprungapp Logo" width={280} height={140} className="relative rounded-xl shadow-2xl" />
             </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text-orange leading-tight">
             Web-App Bewertung Hochsprung
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -401,16 +401,19 @@ export default function Page() {
             Offizielle NRW-Tabellen • Klassen 1-10 (1-5 Noten) & GOSt (15-Punkte-System nach Heft 4734/2)
           </p>
 
-          {/* Wechsel-Button zu Hochsprung */}
-          <Link href="/" className="inline-block">
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
-              <span className="text-xl">🏃‍♂️</span>
-              Zur Hochsprung-Bewertung
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          </Link>
+          {/* Wechsel-Button zu Weitsprung */}
+          <div className="mt-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-emerald-500 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+            <Link href="/" className="inline-block relative">
+              <button className="px-8 py-4 bg-gradient-to-r from-blue-500 via-cyan-500 to-emerald-500 hover:from-blue-600 hover:via-cyan-600 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-blue-500/50 hover:scale-110 flex items-center gap-3 mx-auto border-2 border-white/20">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                </svg>
+                <span>Zur Weitsprung-Bewertung</span>
+                <span className="text-2xl animate-bounce">➡️</span>
+              </button>
+            </Link>
+          </div>
 
           <div className="flex justify-center gap-2 text-sm text-gray-500 flex-wrap">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
@@ -423,9 +426,9 @@ export default function Page() {
               🔄 Reproduzierbarkeit
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🎯 Absprunggenauigkeit
+              🎯 Technik
             </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-600 text-white card-shadow">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white card-shadow">
               📏 Höhe
             </span>
           </div>
