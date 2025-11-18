@@ -122,6 +122,7 @@ export default function Page() {
   const [showHauptgewichtungInfo, setShowHauptgewichtungInfo] = useState(false);
   const [tabellenAnhebung, setTabellenAnhebung] = useState(0);
   const [showAnhebungInfo, setShowAnhebungInfo] = useState(false);
+  const [showGrenzwerte, setShowGrenzwerte] = useState(false);
 
   const handle = (k, v) => setWerte(prev => ({ ...prev, [k]: v }));
 
@@ -162,6 +163,49 @@ export default function Page() {
   const isGOSt = () => {
     const option = classOptions.find(opt => opt.value === selectedClass);
     return option && option.type === 'gost';
+  };
+
+  const getGrenzwerteWithAnhebung = () => {
+    const boysData = officialTables.grades_1_10[classOptions.find(opt => opt.value === selectedClass)?.grade]?.boys ||
+                     officialTables.gost[classOptions.find(opt => opt.value === selectedClass)?.grade]?.[classOptions.find(opt => opt.value === selectedClass)?.kurs]?.boys;
+    const girlsData = officialTables.grades_1_10[classOptions.find(opt => opt.value === selectedClass)?.grade]?.girls ||
+                      officialTables.gost[classOptions.find(opt => opt.value === selectedClass)?.grade]?.[classOptions.find(opt => opt.value === selectedClass)?.kurs]?.girls;
+
+    if (!boysData || !girlsData) return null;
+
+    const isGOStTable = isGOSt();
+    const result = { boys: {}, girls: {} };
+
+    if (isGOStTable) {
+      // GOSt: 15-Punkte-System - reduziere Grenzwert durch Anhebung
+      for (let np = 1; np <= 15; np++) {
+        // Finde den ursprünglichen Notenpunkt, der nach Anhebung zu np wird
+        const originalNp = Math.max(1, np - tabellenAnhebung);
+        if (boysData[originalNp]) result.boys[np] = boysData[originalNp];
+        if (girlsData[originalNp]) result.girls[np] = girlsData[originalNp];
+      }
+    } else {
+      // Klassen 1-10: Note zu Notenpunkten, Anhebung, zurück zu Note
+      const notenMap = { 1: 15, 2: 12, 3: 9, 4: 6, 5: 3 };
+      for (let note = 1; note <= 5; note++) {
+        const notenpunkte = notenMap[note];
+        // Finde ursprünglichen Notenpunkt nach Abzug der Anhebung
+        const originalNp = Math.max(0, notenpunkte - tabellenAnhebung);
+        // Finde welche ursprüngliche Note das war
+        let originalNote = 6;
+        for (let n = 1; n <= 5; n++) {
+          if (notenMap[n] === originalNp || (notenMap[n] && notenMap[n] >= originalNp && (!notenMap[n-1] || notenMap[n-1] < originalNp))) {
+            originalNote = n;
+            break;
+          }
+        }
+        // Verwende den Grenzwert dieser ursprünglichen Note
+        if (boysData[originalNote]) result.boys[note] = boysData[originalNote];
+        if (girlsData[originalNote]) result.girls[note] = girlsData[originalNote];
+      }
+    }
+
+    return result;
   };
 
   const berechneNoteAusWeite = (weite) => {
@@ -633,6 +677,21 @@ export default function Page() {
               </div>
             </div>
 
+            {/* Grenzwerte anzeigen Button */}
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200">
+              <button
+                onClick={() => setShowGrenzwerte(true)}
+                className="w-full btn-gradient from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                <span className="text-xl">📊</span>
+                Notengrenzwerte anzeigen
+                <span className="text-sm font-normal opacity-90">(Mindestleistungen)</span>
+              </button>
+              <p className="text-xs text-gray-600 mt-2 text-center">
+                Zeigt ab welcher Weite welche Note erreicht wird
+              </p>
+            </div>
+
             {/* Tabellen-Anhebung */}
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border-2 border-orange-200">
               <div className="flex items-center justify-between mb-3">
@@ -1089,6 +1148,111 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* Grenzwerte Modal */}
+      {showGrenzwerte && (() => {
+        const grenzwerte = getGrenzwerteWithAnhebung();
+        const classOption = classOptions.find(opt => opt.value === selectedClass);
+        const classLabel = classOption?.label || selectedClass;
+        const isGOStTable = isGOSt();
+
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowGrenzwerte(false)}>
+            <div className="bg-white rounded-2xl card-shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-bold flex items-center gap-2">
+                    <span className="text-3xl">📊</span>
+                    Notengrenzwerte
+                  </h3>
+                  <button
+                    onClick={() => setShowGrenzwerte(false)}
+                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200 flex items-center justify-center text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <p className="text-white/90 text-sm mt-2">
+                  {classLabel} • Mindestleistungen für jede Note
+                </p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {tabellenAnhebung > 0 && (
+                  <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                    <p className="text-sm text-orange-900 font-medium">
+                      ⚠️ Achtung: Tabellen-Anpassung aktiv (+{tabellenAnhebung} {tabellenAnhebung === 1 ? 'Notenpunkt' : 'Notenpunkte'})
+                      <br />
+                      Die angezeigten Grenzwerte berücksichtigen bereits diese Anhebung.
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                  <p className="text-sm text-blue-900">
+                    <strong>Lesehinweis:</strong> Die Tabelle zeigt die Mindestleistung (in Metern), die für die jeweilige Note erreicht werden muss.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Jungen */}
+                  <div className="bg-blue-50 rounded-xl p-5 border-2 border-blue-200">
+                    <h4 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                      👦 Jungen
+                    </h4>
+                    <div className="space-y-2">
+                      {grenzwerte && Object.keys(grenzwerte.boys).sort((a, b) => {
+                        if (isGOStTable) return b - a; // 15 bis 1
+                        return a - b; // 1 bis 5
+                      }).map(key => (
+                        <div key={key} className="flex justify-between items-center bg-white p-3 rounded-lg border border-blue-200">
+                          <span className="font-semibold text-gray-800">
+                            {isGOStTable ? `${key} NP` : `Note ${key}`}
+                          </span>
+                          <span className="text-lg font-bold text-blue-700">
+                            ≥ {grenzwerte.boys[key]?.toFixed(2)} m
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Mädchen */}
+                  <div className="bg-pink-50 rounded-xl p-5 border-2 border-pink-200">
+                    <h4 className="text-xl font-bold text-pink-900 mb-4 flex items-center gap-2">
+                      👧 Mädchen
+                    </h4>
+                    <div className="space-y-2">
+                      {grenzwerte && Object.keys(grenzwerte.girls).sort((a, b) => {
+                        if (isGOStTable) return b - a; // 15 bis 1
+                        return a - b; // 1 bis 5
+                      }).map(key => (
+                        <div key={key} className="flex justify-between items-center bg-white p-3 rounded-lg border border-pink-200">
+                          <span className="font-semibold text-gray-800">
+                            {isGOStTable ? `${key} NP` : `Note ${key}`}
+                          </span>
+                          <span className="text-lg font-bold text-pink-700">
+                            ≥ {grenzwerte.girls[key]?.toFixed(2)} m
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setShowGrenzwerte(false)}
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200"
+                  >
+                    Schließen
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Anhebung Info Modal */}
       {showAnhebungInfo && (
