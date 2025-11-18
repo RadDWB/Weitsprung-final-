@@ -4,11 +4,13 @@ import { saveAs } from "file-saver";
 import Image from "next/image";
 import Link from "next/link";
 
-// Umbenannte Kriterien
-const kriterien = ["Anlaufgestaltung", "Sprungausführung", "Reproduzierbarkeit (3x)", "Genauigkeit zum Absprungpunkt/Zone"];
-const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Genauigkeit"];
+// Kriterien für Hochsprung
+const kriterien = ["Anlauf", "Sprungausführung", "Reproduzierbarkeit (3x)", "Schwungbein-/Sprungbeintechnik"];
+const kriterienKurz = ["Anlauf", "Sprung", "Reproduzierbarkeit", "Technik"];
 
-// Offizielle NRW-Weitsprung-Tabellen
+// ⚠️ PLATZHALTER: Offizielle NRW-Hochsprung-Tabellen
+// TODO: Diese Tabellen müssen noch durch echte Hochsprung-Daten ersetzt werden!
+// Aktuell sind hier noch die Weitsprung-Werte als Platzhalter
 // Klassen 1-10: basierend auf RNG Wangen, Reismann-Gymnasium, DSA (1-5 Notensystem)
 // GOSt: Offizielle Abitur-Tabellen NRW Heft 4734/2 (1-15 Notenpunkte nach APO-GOSt)
 const officialTables = {
@@ -101,10 +103,10 @@ export default function Page() {
   const [meter, setMeter] = useState("");
   const [zentimeter, setZentimeter] = useState("");
   const [werte, setWerte] = useState({
-    Anlaufgestaltung: "",
+    Anlauf: "",
     Sprungausführung: "",
     "Reproduzierbarkeit (3x)": "",
-    "Genauigkeit zum Absprungpunkt/Zone": ""
+    "Schwungbein-/Sprungbeintechnik": ""
   });
   const [liste, setListe] = useState([]);
   const [gewichtung, setGewichtung] = useState({
@@ -112,10 +114,10 @@ export default function Page() {
     quantitativ: 50
   });
   const [gewichtungQualitativ, setGewichtungQualitativ] = useState({
-    Anlaufgestaltung: 25,
+    Anlauf: 25,
     Sprungausführung: 25,
     "Reproduzierbarkeit (3x)": 25,
-    "Genauigkeit zum Absprungpunkt/Zone": 25
+    "Schwungbein-/Sprungbeintechnik": 25
   });
   const [showInfo, setShowInfo] = useState(false);
   const [showTabellenInfo, setShowTabellenInfo] = useState(false);
@@ -164,7 +166,7 @@ export default function Page() {
     return option && option.type === 'gost';
   };
 
-  const berechneNoteAusWeite = (weite) => {
+  const berechneNoteAusHöhe = (weite) => {
     const tableData = getCurrentTableData();
     if (!tableData) return isGOSt() ? "0" : "6";
 
@@ -260,12 +262,12 @@ export default function Page() {
       qualitativNote = punkteZuNote(qualitativSum);
     }
 
-    // Quantitative Bewertung (Weite) - offizielle Tabellen
+    // Quantitative Bewertung (Höhe) - offizielle Tabellen
     let quantitativSum = 0;
     let quantitativNote = "-";
 
     if (gewichtung.quantitativ > 0) {
-      const weitePunkte = berechneNoteAusWeite(weiteInMetern); // Gibt Notenpunkte zurück (0-15)
+      const weitePunkte = berechneNoteAusHöhe(weiteInMetern); // Gibt Notenpunkte zurück (0-15)
       quantitativSum = parseInt(weitePunkte);
       // Konvertiere Notenpunkte zu Anzeige-Note (mit Plus/Minus)
       quantitativNote = isGOSt() ? weitePunkte : punkteZuNote(quantitativSum);
@@ -304,10 +306,10 @@ export default function Page() {
     setMeter("");
     setZentimeter("");
     setWerte({
-      Anlaufgestaltung: "",
+      Anlauf: "",
       Sprungausführung: "",
       "Reproduzierbarkeit (3x)": "",
-      "Genauigkeit zum Absprungpunkt/Zone": ""
+      "Schwungbein-/Sprungbeintechnik": ""
     });
   };
 
@@ -318,7 +320,7 @@ export default function Page() {
   };
 
   const exportCSV = () => {
-    const header = ["Name", "Tabelle", "Weite (m)", ...kriterienKurz, "Qualitativ", "Quantitativ", "Gesamt", "Endnote"];
+    const header = ["Name", "Tabelle", "Höhe (m)", ...kriterienKurz, "Qualitativ", "Quantitativ", "Gesamt", "Endnote"];
     const rows = liste.map(a => [
       a.name,
       a.tabelle,
@@ -330,7 +332,7 @@ export default function Page() {
       a.note
     ]);
     const csv = [header, ...rows].map(r => r.join(",")).join("\n");
-    saveAs(new Blob([csv], { type: "text/csv" }), "weitsprung_bewertung.csv");
+    saveAs(new Blob([csv], { type: "text/csv" }), "hochsprung_bewertung.csv");
   };
 
   const getCurrentTableSummary = () => {
@@ -377,29 +379,29 @@ export default function Page() {
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text leading-tight">
-            Web-App Bewertung Weitsprung
+            Web-App Bewertung Hochsprung
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Qualitative und quantitative Bewertung im Weitsprung
+            Qualitative und quantitative Bewertung im Hochsprung
           </p>
           <p className="text-sm text-gray-500">
             Offizielle NRW-Tabellen • Klassen 1-10 (1-5 Noten) & GOSt (15-Punkte-System nach Heft 4734/2)
           </p>
 
-          {/* Wechsel-Button zu Hochsprung */}
-          <Link href="/hochsprung" className="inline-block">
-            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
-              <span className="text-xl">🏃‍♂️</span>
-              Zur Hochsprung-Bewertung
+          {/* Wechsel-Button zu Weitsprung */}
+          <Link href="/" className="inline-block">
+            <button className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center gap-2 mx-auto">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
+              <span className="text-xl">🏃‍♂️</span>
+              Zur Weitsprung-Bewertung
             </button>
           </Link>
 
           <div className="flex justify-center gap-2 text-sm text-gray-500 flex-wrap">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
-              🏃 Anlaufgestaltung
+              🏃 Anlauf
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
               🦘 Sprungausführung
@@ -411,7 +413,7 @@ export default function Page() {
               🎯 Absprunggenauigkeit
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-600 text-white card-shadow">
-              📏 Weite
+              📏 Höhe
             </span>
           </div>
         </div>
@@ -456,7 +458,7 @@ export default function Page() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-700">📏 Quantitativ (Weite)</label>
+                <label className="text-sm font-semibold text-gray-700">📏 Quantitativ (Höhe)</label>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 text-white min-w-[60px] justify-center">
                   {gewichtung.quantitativ}%
                 </span>
@@ -528,10 +530,10 @@ export default function Page() {
           <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
             <button
               onClick={() => setGewichtungQualitativ({
-                Anlaufgestaltung: 25,
+                Anlauf: 25,
                 Sprungausführung: 25,
                 "Reproduzierbarkeit (3x)": 25,
-                "Genauigkeit zum Absprungpunkt/Zone": 25
+                "Schwungbein-/Sprungbeintechnik": 25
               })}
               className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200"
             >
@@ -669,7 +671,7 @@ export default function Page() {
             <div className="bg-blue-50 rounded-xl p-5">
               <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                 <span className="text-xl">📏</span>
-                Weitsprung-Weite
+                Hochsprung-Höhe
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -707,7 +709,7 @@ export default function Page() {
                 <div className="mt-3 p-3 bg-white rounded-lg">
                   <p className="text-sm text-gray-600 font-semibold">
                     Gesamtweite: {parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100} m
-                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusWeite(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
+                    → {isGOSt() ? 'Notenpunkte:' : 'Note:'} <span className="text-blue-600 text-lg">{berechneNoteAusHöhe(parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100)}{isGOSt() ? ' NP' : ''}</span>
                   </p>
                   {getCurrentTableSummary() && (
                     <div className="text-xs text-gray-500 mt-2">
@@ -807,7 +809,7 @@ export default function Page() {
                       <tr>
                         <th className="px-4 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">Name</th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Tabelle</th>
-                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Weite</th>
+                        <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Höhe</th>
                         {kriterienKurz.map((k, idx) => (
                           <th key={k} className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
                             <div className="flex flex-col items-center gap-1">
@@ -825,7 +827,7 @@ export default function Page() {
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
                           <div className="flex flex-col items-center gap-1">
                             <span>Quantitativ</span>
-                            <span className="text-xs normal-case">(Weite)</span>
+                            <span className="text-xs normal-case">(Höhe)</span>
                           </div>
                         </th>
                         <th className="px-4 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">Endnote</th>
@@ -888,7 +890,7 @@ export default function Page() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold flex items-center gap-2">
                   <span className="text-3xl">📊</span>
-                  Offizielle NRW-Weitsprung-Tabellen
+                  Offizielle NRW-Hochsprung-Tabellen
                 </h3>
                 <button
                   onClick={() => setShowTabellenInfo(false)}
@@ -920,7 +922,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Q2 LK - Jungen (Abitur)</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">NP</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[15, 12, 9, 6, 3, 1].map(np => (
@@ -936,7 +938,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Q2 LK - Mädchen (Abitur)</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">NP</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">NP</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[15, 12, 9, 6, 3, 1].map(np => (
@@ -962,7 +964,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Klasse 10 - Jungen</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">Note</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[1,2,3,4,5].map(note => (
@@ -978,7 +980,7 @@ export default function Page() {
                       <p className="font-semibold mb-2">Klasse 10 - Mädchen</p>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100">
-                          <tr><th className="p-2">Note</th><th className="p-2">Weite</th></tr>
+                          <tr><th className="p-2">Note</th><th className="p-2">Höhe</th></tr>
                         </thead>
                         <tbody>
                           {[1,2,3,4,5].map(note => (
@@ -1031,27 +1033,27 @@ export default function Page() {
                 <h4 className="font-bold text-gray-800 mb-2">🎯 Was ist die Hauptgewichtung?</h4>
                 <p className="text-gray-600 leading-relaxed">
                   Die Hauptgewichtung bestimmt, wie stark die <strong>Technik</strong> (qualitative Kriterien)
-                  im Vergleich zur <strong>Weite</strong> (quantitative Messung) in die Gesamtnote einfließt.
+                  im Vergleich zur <strong>Höhe</strong> (quantitative Messung) in die Gesamtnote einfließt.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-bold text-gray-800 mb-2">🎨 Qualitativ (Technik) - {gewichtung.qualitativ}%</h4>
                 <p className="text-gray-600 leading-relaxed mb-2">
-                  Bewertet die technische Ausführung des Weitsprungs in vier Teilbereichen:
+                  Bewertet die technische Ausführung des Hochsprungs in vier Teilbereichen:
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
-                  <li><strong>Anlaufgestaltung:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
+                  <li><strong>Anlauf:</strong> Rhythmus, Geschwindigkeitsaufbau, Anlaufgenauigkeit</li>
                   <li><strong>Sprungausführung:</strong> Absprungtechnik, Flugphase, Landung</li>
                   <li><strong>Reproduzierbarkeit (3x):</strong> Konstanz über drei Versuche</li>
-                  <li><strong>Genauigkeit zum Absprungpunkt/Zone:</strong> Präzision beim Absprung</li>
+                  <li><strong>Schwungbein-/Sprungbeintechnik:</strong> Präzision beim Absprung</li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-bold text-gray-800 mb-2">📏 Quantitativ (Weite) - {gewichtung.quantitativ}%</h4>
+                <h4 className="font-bold text-gray-800 mb-2">📏 Quantitativ (Höhe) - {gewichtung.quantitativ}%</h4>
                 <p className="text-gray-600 leading-relaxed">
-                  Bewertet die gemessene Sprungweite anhand offizieller NRW-Tabellen.
+                  Bewertet die gemessene Sprunghöhe anhand offizieller NRW-Tabellen.
                   Die Tabellen sind alters- und geschlechtsspezifisch und berücksichtigen
                   für die GOSt auch die Unterscheidung zwischen Grund- und Leistungskurs.
                 </p>
@@ -1064,7 +1066,7 @@ export default function Page() {
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
                   <li><strong>Mehr Technik:</strong> Schieben Sie den linken Regler nach rechts (z.B. 70% qualitativ, 30% quantitativ)</li>
-                  <li><strong>Mehr Weite:</strong> Schieben Sie den rechten Regler nach rechts (z.B. 30% qualitativ, 70% quantitativ)</li>
+                  <li><strong>Mehr Höhe:</strong> Schieben Sie den rechten Regler nach rechts (z.B. 30% qualitativ, 70% quantitativ)</li>
                   <li><strong>Ausgewogen:</strong> Standard ist 50/50 - beide Aspekte gleich wichtig</li>
                 </ul>
               </div>
@@ -1207,7 +1209,7 @@ export default function Page() {
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Die hinterlegten Tabellen basieren auf offiziellen NRW-Standards und wissenschaftlich fundierten
                   Leistungserwartungen. Sie bilden <strong>ohne Anpassung</strong> ab, was im Land Nordrhein-Westfalen
-                  regulär als Weitsprung-Leistung für die entsprechende Notenstufe oder Punktzahl erwartet wird.
+                  regulär als Hochsprung-Leistung für die entsprechende Notenstufe oder Punktzahl erwartet wird.
                   Eine Anpassung sollte daher nur nach sorgfältiger Abwägung erfolgen.
                 </p>
               </div>
@@ -1264,14 +1266,14 @@ export default function Page() {
                 </p>
                 <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
                   <li><strong>Qualitativ ({gewichtung.qualitativ}%)</strong>: Technische Bewertung mit 1+/1/1-/... System</li>
-                  <li><strong>Quantitativ ({gewichtung.quantitativ}%)</strong>: Weitsprung-Weite basierend auf offiziellen NRW-Tabellen (1-5)</li>
+                  <li><strong>Quantitativ ({gewichtung.quantitativ}%)</strong>: Hochsprung-Höhe basierend auf offiziellen NRW-Tabellen (1-5)</li>
                 </ul>
               </div>
 
               <div>
                 <h4 className="font-bold text-gray-800 mb-2">📊 Offizielle Tabellen</h4>
                 <p className="text-gray-600 leading-relaxed mb-2">
-                  Die quantitative Bewertung nutzt offizielle Weitsprung-Tabellen aus NRW:
+                  Die quantitative Bewertung nutzt offizielle Hochsprung-Tabellen aus NRW:
                 </p>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   <li><strong>Klassen 1-10:</strong> 1-5 Notensystem (RNG Wangen, Reismann-Gymnasium, DSA)</li>
