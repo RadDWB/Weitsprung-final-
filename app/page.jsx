@@ -119,6 +119,8 @@ export default function Page() {
   const [showInfo, setShowInfo] = useState(false);
   const [showTabellenInfo, setShowTabellenInfo] = useState(false);
   const [showHauptgewichtungInfo, setShowHauptgewichtungInfo] = useState(false);
+  const [tabellenAnhebung, setTabellenAnhebung] = useState(0);
+  const [showAnhebungInfo, setShowAnhebungInfo] = useState(false);
 
   const handle = (k, v) => setWerte(prev => ({ ...prev, [k]: v }));
 
@@ -168,21 +170,29 @@ export default function Page() {
     // Für GOSt: 15-Punkte-System (höher = besser)
     if (isGOSt()) {
       // Suche nach höchstem Notenpunkt, der erreicht wird
+      let erreichtePunkte = 0;
       for (let np = 15; np >= 1; np--) {
         if (tableData[np] && weite >= tableData[np]) {
-          return np.toString();
+          erreichtePunkte = np;
+          break;
         }
       }
-      return "0"; // Unterhalb aller Schwellenwerte
+      // Anhebung hinzufügen (maximal 15 Punkte)
+      const mitAnhebung = Math.min(15, erreichtePunkte + tabellenAnhebung);
+      return mitAnhebung.toString();
     }
 
     // Für Klassen 1-10: 1-6 Notensystem
-    if (weite >= tableData[1]) return "1";
-    if (weite >= tableData[2]) return "2";
-    if (weite >= tableData[3]) return "3";
-    if (weite >= tableData[4]) return "4";
-    if (weite >= tableData[5]) return "5";
-    return "6";
+    let note = 6;
+    if (weite >= tableData[1]) note = 1;
+    else if (weite >= tableData[2]) note = 2;
+    else if (weite >= tableData[3]) note = 3;
+    else if (weite >= tableData[4]) note = 4;
+    else if (weite >= tableData[5]) note = 5;
+
+    // Anhebung hinzufügen (Note wird besser, minimal 1)
+    const mitAnhebung = Math.max(1, note - tabellenAnhebung);
+    return mitAnhebung.toString();
   };
 
   const noteZuPunkten = (note, isQualitative = false) => {
@@ -603,7 +613,37 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Tabellen-Anhebung */}
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border-2 border-orange-200">
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-semibold text-gray-700">
+                  ⚙️ Tabellen-Anpassung (Optional)
+                </label>
+                <button
+                  onClick={() => setShowAnhebungInfo(true)}
+                  className="text-orange-600 hover:text-orange-800 transition-colors p-1 hover:bg-orange-100 rounded-full"
+                  title="Hilfe zur Tabellen-Anpassung"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </div>
+              <select
+                value={tabellenAnhebung}
+                onChange={e => setTabellenAnhebung(parseInt(e.target.value))}
+                className="input-modern p-3 w-full text-base shadow-sm cursor-pointer hover:border-orange-400 bg-white"
+              >
+                <option value={0}>Standard (keine Anpassung)</option>
+                <option value={1}>+1 Punkt (leichte Anhebung)</option>
+                <option value={2}>+2 Punkte (mittlere Anhebung)</option>
+                <option value={3}>+3 Punkte (starke Anhebung)</option>
+              </select>
+              {tabellenAnhebung > 0 && (
+                <div className="mt-2 text-xs text-orange-700 bg-orange-100 p-2 rounded">
+                  ⚠️ Anpassung aktiv: Alle Noten werden um {tabellenAnhebung} {tabellenAnhebung === 1 ? 'Punkt' : 'Punkte'} angehoben
+                </div>
+              )}
             </div>
 
             <div className="bg-blue-50 rounded-xl p-5">
@@ -1021,6 +1061,140 @@ export default function Page() {
                 <button
                   onClick={() => setShowHauptgewichtungInfo(false)}
                   className="w-full btn-gradient text-white font-semibold px-6 py-3 rounded-xl"
+                >
+                  Verstanden
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Anhebung Info Modal */}
+      {showAnhebungInfo && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowAnhebungInfo(false)}>
+          <div className="bg-white rounded-2xl card-shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-orange-600 via-yellow-600 to-amber-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <span className="text-3xl">⚙️</span>
+                  Tabellen-Anpassung verstehen
+                </h3>
+                <button
+                  onClick={() => setShowAnhebungInfo(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200 flex items-center justify-center text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                <p className="text-sm text-orange-900 font-medium">
+                  Diese Funktion ermöglicht es Ihnen, die Bewertungstabellen um 1, 2 oder 3 Punkte anzuheben,
+                  um besonderen Bedingungen Ihrer Lerngruppe gerecht zu werden.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">📊</span>
+                  Was bedeutet die Anhebung?
+                </h4>
+                <p className="text-gray-600 leading-relaxed mb-3">
+                  Eine Anhebung verbessert die Bewertung aller Schüler*innen:
+                </p>
+                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
+                  <li><strong>+1 Punkt:</strong> Eine Sprungweite, die normalerweise Note 3 (bzw. 10 NP) ergibt, wird zu Note 2 (bzw. 11 NP)</li>
+                  <li><strong>+2 Punkte:</strong> Note 4 → Note 2 (bzw. 8 NP → 10 NP)</li>
+                  <li><strong>+3 Punkte:</strong> Note 5 → Note 2 (bzw. 6 NP → 9 NP)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">⚠️</span>
+                  Wichtige Hinweise zur Verwendung
+                </h4>
+                <div className="space-y-3">
+                  <div className="bg-yellow-50 border border-yellow-200 p-3 rounded">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      <strong>Fachkonferenz einbeziehen:</strong> Es wird dringend empfohlen, eine Tabellen-Anpassung
+                      nur in Absprache mit der Fachkonferenz Sport vorzunehmen. Dies gewährleistet eine einheitliche
+                      Handhabung und Transparenz im gesamten Fachbereich.
+                    </p>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      <strong>Jahrgangsstufenweite Entscheidung:</strong> Wenn eine Anpassung vorgenommen wird,
+                      sollte diese für die gesamte Jahrgangsstufe gelten. Nur so ist die Vergleichbarkeit der
+                      Anforderungen und Leistungsbewertung zwischen verschiedenen Klassen gewährleistet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">🎓</span>
+                  Wann kann eine Anpassung sinnvoll sein?
+                </h4>
+                <p className="text-gray-600 leading-relaxed mb-3">
+                  Aus pädagogischer Sicht kann eine Tabellen-Anpassung unter folgenden Umständen erwogen werden:
+                </p>
+                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
+                  <li><strong>Unzureichende Vorbereitung:</strong> Wenn die Vorbereitungsbedingungen nicht adäquat waren
+                  (z.B. Hallensperrung, Wetterbedingungen, fehlende Unterrichtsstunden)</li>
+                  <li><strong>Standortfaktoren:</strong> Besondere räumliche oder materielle Gegebenheiten der Schule,
+                  die die Trainingsmöglichkeiten einschränken</li>
+                  <li><strong>Leistungsstand der Lerngruppe:</strong> Wenn der allgemeine Leistungsstand der Schüler*innen
+                  deutlich unter dem Erwartungswert liegt</li>
+                  <li><strong>Soziale Faktoren:</strong> Besondere sozioökonomische oder gesundheitliche Rahmenbedingungen
+                  der Lerngruppe</li>
+                  <li><strong>Inklusive Lerngruppen:</strong> Anpassung bei heterogenen Gruppen mit besonderen Förderbedarfen</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">✅</span>
+                  Professionelle Eigenverantwortung
+                </h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Als Lehrkraft haben Sie die professionelle Kompetenz und Eigenverantwortung, solche Anpassungen
+                  im Rahmen Ihrer pädagogischen Freiheit vorzunehmen. Die Entscheidung sollte jedoch stets
+                  pädagogisch begründbar und im Sinne einer fairen, transparenten Leistungsbewertung sein.
+                </p>
+              </div>
+
+              <div className="bg-gray-100 border-l-4 border-gray-500 p-4 rounded">
+                <h4 className="font-bold text-gray-800 mb-2">📋 Zur Erinnerung:</h4>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Die hinterlegten Tabellen basieren auf offiziellen NRW-Standards und wissenschaftlich fundierten
+                  Leistungserwartungen. Sie bilden <strong>ohne Anpassung</strong> ab, was im Land Nordrhein-Westfalen
+                  regulär als Weitsprung-Leistung für die entsprechende Notenstufe oder Punktzahl erwartet wird.
+                  Eine Anpassung sollte daher nur nach sorgfältiger Abwägung erfolgen.
+                </p>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 p-4 rounded">
+                <h4 className="font-bold text-green-800 mb-2">💡 Empfehlung für die Praxis:</h4>
+                <p className="text-sm text-gray-700 leading-relaxed mb-2">
+                  <strong>Dokumentation:</strong> Halten Sie die Gründe für eine Tabellen-Anpassung schriftlich fest
+                  und informieren Sie die Schüler*innen transparent über die angewendeten Bewertungsmaßstäbe.
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>Transparenz:</strong> Kommunizieren Sie die Anpassung offen gegenüber Schüler*innen, Eltern
+                  und Kolleg*innen, um Nachvollziehbarkeit und Akzeptanz zu gewährleisten.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowAnhebungInfo(false)}
+                  className="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-orange-700 hover:to-amber-700 transition-all duration-200"
                 >
                   Verstanden
                 </button>
