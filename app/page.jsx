@@ -11,6 +11,7 @@ export default function Page() {
   const [werte, setWerte] = useState({ Sprint: "", Sprung: "", Reproduzierbarkeit: "", Treffgenauigkeit: "" });
   const [liste, setListe] = useState([]);
   const [gewichtung, setGewichtung] = useState({ Sprint: 25, Sprung: 25, Reproduzierbarkeit: 25, Treffgenauigkeit: 25 });
+  const [showInfo, setShowInfo] = useState(false);
 
   const handle = (k, v) => setWerte(prev => ({ ...prev, [k]: v }));
 
@@ -110,13 +111,22 @@ export default function Page() {
 
         {/* Gewichtungs-Slider */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl card-shadow-lg p-6 sm:p-8 space-y-6 animate-slideIn">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <span className="text-3xl">⚖️</span>
-            Gewichtung anpassen
-            <span className="ml-auto text-sm font-normal text-gray-500">
-              Summe: {gewichtung.Sprint + gewichtung.Sprung + gewichtung.Reproduzierbarkeit + gewichtung.Treffgenauigkeit}%
-            </span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <span className="text-3xl">⚖️</span>
+              Gewichtung anpassen
+              <span className="ml-4 text-sm font-normal text-gray-500">
+                Summe: {gewichtung.Sprint + gewichtung.Sprung + gewichtung.Reproduzierbarkeit + gewichtung.Treffgenauigkeit}%
+              </span>
+            </h2>
+            <button
+              onClick={() => setShowInfo(true)}
+              className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold text-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
+              title="Hilfe zur Gewichtung"
+            >
+              ?
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {kriterien.map((k, idx) => (
@@ -300,6 +310,170 @@ export default function Page() {
           </div>
         )}
       </div>
+
+      {/* Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn" onClick={() => setShowInfo(false)}>
+          <div className="bg-white rounded-2xl card-shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <span className="text-3xl">💡</span>
+                  Gewichtung verstehen
+                </h3>
+                <button
+                  onClick={() => setShowInfo(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200 flex items-center justify-center text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Aktuelle Gewichtung */}
+              <div className="bg-blue-50 rounded-xl p-5">
+                <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">📊</span>
+                  Aktuelle Gewichtung
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {kriterien.map((k, idx) => (
+                    <div key={k} className="flex items-center justify-between bg-white rounded-lg p-3">
+                      <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <span>{['🏃', '🦘', '🔄', '🎯'][idx]}</span>
+                        {k}
+                      </span>
+                      <span className="font-bold text-blue-600">{gewichtung[k]}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Was ist Gewichtung? */}
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">⚖️</span>
+                  Was ist Gewichtung?
+                </h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Die Gewichtung bestimmt, wie wichtig die einzelnen Parameter bei der Berechnung der Endnote sind.
+                  Eine höhere Gewichtung bedeutet, dass dieser Parameter einen größeren Einfluss auf die Gesamtnote hat.
+                </p>
+              </div>
+
+              {/* Standard-Einstellung */}
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">🎯</span>
+                  Standard-Einstellung (ausgeglichen)
+                </h4>
+                <p className="text-gray-600 leading-relaxed mb-3">
+                  Bei der Standard-Einstellung sind alle vier Parameter gleich wichtig:
+                </p>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>🏃 Sprint:</span>
+                    <span className="font-bold">25%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🦘 Sprung:</span>
+                    <span className="font-bold">25%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🔄 Reproduzierbarkeit:</span>
+                    <span className="font-bold">25%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🎯 Treffgenauigkeit:</span>
+                    <span className="font-bold">25%</span>
+                  </div>
+                  <div className="border-t-2 border-gray-300 pt-2 flex justify-between font-bold">
+                    <span>Gesamt:</span>
+                    <span className="text-blue-600">100%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Wie verstelle ich die Gewichtung? */}
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">🎚️</span>
+                  Wie verstelle ich die Gewichtung?
+                </h4>
+                <ol className="text-gray-600 leading-relaxed space-y-2 list-decimal list-inside">
+                  <li>Bewegen Sie einen der vier Slider nach rechts (höhere Gewichtung) oder links (niedrigere Gewichtung)</li>
+                  <li>Die anderen drei Slider passen sich automatisch an, damit die Summe immer 100% bleibt</li>
+                  <li>Die Anpassung erfolgt proportional zu den aktuellen Werten der anderen Parameter</li>
+                </ol>
+              </div>
+
+              {/* Auswirkungen */}
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">📈</span>
+                  Wie wirkt sich das aus?
+                </h4>
+                <div className="space-y-3">
+                  <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-semibold text-green-800 mb-1">Beispiel 1: Leistung betonen</p>
+                    <p className="text-sm text-gray-600">
+                      Sprint 40%, Sprung 40%, Rest 20% → Die körperliche Leistung wird stärker bewertet als die technische Genauigkeit
+                    </p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                    <p className="font-semibold text-purple-800 mb-1">Beispiel 2: Genauigkeit betonen</p>
+                    <p className="text-sm text-gray-600">
+                      Reproduzierbarkeit 40%, Treffgenauigkeit 40%, Rest 20% → Die technische Genauigkeit wird höher bewertet
+                    </p>
+                  </div>
+                  <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-500">
+                    <p className="font-semibold text-orange-800 mb-1">Beispiel 3: Nur Sprint wichtig</p>
+                    <p className="text-sm text-gray-600">
+                      Sprint 100%, Rest 0% → Die Note basiert ausschließlich auf der Sprint-Leistung
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schnelleinstellungen */}
+              <div>
+                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                  <span className="text-xl">⚡</span>
+                  Schnelleinstellungen nutzen
+                </h4>
+                <p className="text-gray-600 leading-relaxed mb-3">
+                  Unterhalb der Slider finden Sie drei Buttons für häufig verwendete Einstellungen:
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                    <span className="bg-gray-200 px-3 py-1 rounded-lg text-sm font-medium">🔄 Zurücksetzen</span>
+                    <span className="text-sm text-gray-600">→ Alle auf 25% (ausgeglichen)</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                    <span className="bg-gray-200 px-3 py-1 rounded-lg text-sm font-medium">Leistung fokussiert</span>
+                    <span className="text-sm text-gray-600">→ Sprint & Sprung je 50%</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                    <span className="bg-gray-200 px-3 py-1 rounded-lg text-sm font-medium">Genauigkeit fokussiert</span>
+                    <span className="text-sm text-gray-600">→ Reproduzierbarkeit & Treffgenauigkeit je 50%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Schließen Button */}
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowInfo(false)}
+                  className="w-full btn-gradient text-white font-semibold px-6 py-3 rounded-xl shadow-lg"
+                >
+                  Verstanden, schließen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
