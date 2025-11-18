@@ -88,10 +88,10 @@ export default function Page() {
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold gradient-text leading-tight">
-            Weitsprung Bewertung
+            Web-App Bewertung Weitsprung (EPh)
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            RadDWB Web-App zur Genauigkeitsmessung im Weitsprung in der Schule EF
+            Zur Genauigkeitsmessung im Weitsprung in der Schule
           </p>
           <div className="flex justify-center gap-2 text-sm text-gray-500">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/60 backdrop-blur-sm card-shadow">
@@ -474,6 +474,15 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* Copyright Footer */}
+      <footer className="mt-12 pb-8 text-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl card-shadow px-6 py-4 inline-block">
+          <p className="text-sm text-gray-600">
+            © DwB 2025 • Version 1.1
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }
