@@ -60,33 +60,43 @@ const officialTables = {
   }
 };
 
-// Generiere Tabellen-Optionen
-const generateTableOptions = () => {
+// Generiere Tabellen-Optionen (ohne Geschlecht)
+const generateClassOptions = () => {
   const options = [];
 
   // Klassen 1-10
   for (let i = 1; i <= 10; i++) {
-    options.push({ value: `K${i}-J`, label: `Klasse ${i} - Jungen (${officialTables.grades_1_10[i].age} Jahre)`, type: 'grades', grade: i, gender: 'boys' });
-    options.push({ value: `K${i}-M`, label: `Klasse ${i} - Mädchen (${officialTables.grades_1_10[i].age} Jahre)`, type: 'grades', grade: i, gender: 'girls' });
+    options.push({
+      value: `K${i}`,
+      label: `Klasse ${i} (${officialTables.grades_1_10[i].age} Jahre)`,
+      type: 'grades',
+      grade: i
+    });
   }
 
   // GOSt
   ['EF', 'Q1', 'Q2'].forEach(stufe => {
     ['GK', 'LK'].forEach(kurs => {
       const age = officialTables.gost[stufe].age;
-      options.push({ value: `${stufe}-${kurs}-J`, label: `${stufe} ${kurs} - Jungen (${age} Jahre)`, type: 'gost', grade: stufe, kurs, gender: 'boys' });
-      options.push({ value: `${stufe}-${kurs}-M`, label: `${stufe} ${kurs} - Mädchen (${age} Jahre)`, type: 'gost', grade: stufe, kurs, gender: 'girls' });
+      options.push({
+        value: `${stufe}-${kurs}`,
+        label: `${stufe} ${kurs} (${age} Jahre)`,
+        type: 'gost',
+        grade: stufe,
+        kurs
+      });
     });
   });
 
   return options;
 };
 
-const tableOptions = generateTableOptions();
+const classOptions = generateClassOptions();
 
 export default function Page() {
   const [name, setName] = useState("");
-  const [selectedTable, setSelectedTable] = useState("EF-GK-J");
+  const [selectedClass, setSelectedClass] = useState("EF-GK");
+  const [selectedGender, setSelectedGender] = useState("boys");
   const [meter, setMeter] = useState("");
   const [zentimeter, setZentimeter] = useState("");
   const [werte, setWerte] = useState({
@@ -136,18 +146,18 @@ export default function Page() {
   };
 
   const getCurrentTableData = () => {
-    const option = tableOptions.find(opt => opt.value === selectedTable);
+    const option = classOptions.find(opt => opt.value === selectedClass);
     if (!option) return null;
 
     if (option.type === 'grades') {
-      return officialTables.grades_1_10[option.grade][option.gender];
+      return officialTables.grades_1_10[option.grade][selectedGender];
     } else {
-      return officialTables.gost[option.grade][option.kurs][option.gender];
+      return officialTables.gost[option.grade][option.kurs][selectedGender];
     }
   };
 
   const isGOSt = () => {
-    const option = tableOptions.find(opt => opt.value === selectedTable);
+    const option = classOptions.find(opt => opt.value === selectedClass);
     return option && option.type === 'gost';
   };
 
@@ -247,7 +257,9 @@ export default function Page() {
   const speichern = () => {
     const weiteInMetern = parseFloat(meter || 0) + parseFloat(zentimeter || 0) / 100;
     const res = rechne(werte, weiteInMetern);
-    const tableLabel = tableOptions.find(opt => opt.value === selectedTable)?.label || selectedTable;
+    const classOption = classOptions.find(opt => opt.value === selectedClass);
+    const genderLabel = selectedGender === 'boys' ? 'Jungen' : 'Mädchen';
+    const tableLabel = classOption ? `${classOption.label} - ${genderLabel}` : `${selectedClass} - ${genderLabel}`;
     const isGOStEntry = isGOSt();
     setListe([...liste, {
       name,
@@ -508,40 +520,78 @@ export default function Page() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Klassenstufe / Geschlecht / Kurs
+                  Klassenstufe / Kurs
                 </label>
                 <select
-                  value={selectedTable}
-                  onChange={e => setSelectedTable(e.target.value)}
+                  value={selectedClass}
+                  onChange={e => setSelectedClass(e.target.value)}
                   className="input-modern p-3 w-full text-lg shadow-sm cursor-pointer hover:border-cyan-400 bg-white"
                 >
                   <optgroup label="Klasse 1-4 (Grundschule)">
-                    {tableOptions.filter(opt => ['K1', 'K2', 'K3', 'K4'].some(k => opt.value.startsWith(k))).map(opt => (
+                    {classOptions.filter(opt => ['K1', 'K2', 'K3', 'K4'].some(k => opt.value.startsWith(k))).map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </optgroup>
                   <optgroup label="Klasse 5-10 (Sekundarstufe I)">
-                    {tableOptions.filter(opt => ['K5', 'K6', 'K7', 'K8', 'K9', 'K10'].some(k => opt.value.startsWith(k))).map(opt => (
+                    {classOptions.filter(opt => ['K5', 'K6', 'K7', 'K8', 'K9', 'K10'].some(k => opt.value.startsWith(k))).map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </optgroup>
                   <optgroup label="GOSt: EF (Einführungsphase)">
-                    {tableOptions.filter(opt => opt.value.startsWith('EF')).map(opt => (
+                    {classOptions.filter(opt => opt.value.startsWith('EF')).map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </optgroup>
                   <optgroup label="GOSt: Q1 (Qualifikationsphase 1)">
-                    {tableOptions.filter(opt => opt.value.startsWith('Q1')).map(opt => (
+                    {classOptions.filter(opt => opt.value.startsWith('Q1')).map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </optgroup>
                   <optgroup label="GOSt: Q2 (Qualifikationsphase 2)">
-                    {tableOptions.filter(opt => opt.value.startsWith('Q2')).map(opt => (
+                    {classOptions.filter(opt => opt.value.startsWith('Q2')).map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </optgroup>
                 </select>
               </div>
+            </div>
+
+            {/* Geschlechtsauswahl */}
+            <div className="bg-gradient-to-r from-pink-50 to-blue-50 rounded-xl p-4 border-2 border-gray-200">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Geschlecht
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="boys"
+                    checked={selectedGender === 'boys'}
+                    onChange={e => setSelectedGender(e.target.value)}
+                    className="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="ml-3 text-lg font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
+                    👦 Jungen
+                  </span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="girls"
+                    checked={selectedGender === 'girls'}
+                    onChange={e => setSelectedGender(e.target.value)}
+                    className="w-5 h-5 text-pink-600 focus:ring-2 focus:ring-pink-500 cursor-pointer"
+                  />
+                  <span className="ml-3 text-lg font-medium text-gray-700 group-hover:text-pink-600 transition-colors">
+                    👧 Mädchen
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             </div>
 
             <div className="bg-blue-50 rounded-xl p-5">
