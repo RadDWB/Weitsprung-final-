@@ -14,6 +14,25 @@ export const metadata = {
   authors: [{ name: "RadDWB" }],
   viewport: "width=device-width, initial-scale=1",
   themeColor: "#3b82f6",
+  openGraph: {
+    title: "Sprungapp - Weitsprung & Hochsprung Bewertung",
+    description: "Moderne Web-App zur Bewertung von Weitsprung und Hochsprung nach NRW-Tabellen",
+    images: [
+      {
+        url: "/Sprungapp_logo.jpg",
+        width: 1200,
+        height: 600,
+        alt: "Sprungapp Logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sprungapp - Weitsprung & Hochsprung Bewertung",
+    description: "Moderne Web-App zur Bewertung von Weitsprung und Hochsprung nach NRW-Tabellen",
+    images: ["/Sprungapp_logo.jpg"],
+  },
 };
 
 export default function RootLayout({ children }) {
